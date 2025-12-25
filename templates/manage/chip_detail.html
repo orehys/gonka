@@ -1,0 +1,78 @@
+{% extends "manage/base_admin.html" %}
+{% load money %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+<h4>Конфигурация: {{ cfg.make }} — {{ cfg.year }} — {{ cfg.engine }}</h4>
+
+{% for s in stages %}
+  <div class="card mb-3">
+    <div class="card-header">Stage {{ s.name }}</div>
+    <div class="card-body">
+<form method="post" class="mb-2">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="save_stage">
+  <input type="hidden" name="stage_id" value="{{ s.id }}">
+
+  <div class="row fw-semibold mb-2">
+    <div class="col-md-3">Параметр</div>
+    <div class="col-md-3">Заводские</div>
+    <div class="col-md-3">После тюнинга</div>
+    <div class="col-md-2">Разница</div>
+    <div class="col-md-1 text-nowrap">Цена, ₽</div>
+  </div>
+
+  {% for m in s.metrics.all %}
+    <div class="row align-items-center mb-2">
+      <div class="col-md-3"><input class="form-control" name="label_{{ m.id }}" value="{{ m.label }}"></div>
+      <div class="col-md-3"><input class="form-control" name="stock_{{ m.id }}" value="{{ m.stock }}"></div>
+      <div class="col-md-3"><input class="form-control" name="tuned_{{ m.id }}" value="{{ m.tuned }}"></div>
+      <div class="col-md-2"><input class="form-control" name="delta_{{ m.id }}" value="{{ m.delta }}"></div>
+      <div class="col-md-1"><input class="form-control" name="price_{{ m.id }}" value="{{ m.price }}"></div>
+
+      <div class="col-12 mt-1">
+        <button type="submit"
+                class="btn btn-sm btn-outline-danger"
+                form="del-m-{{ m.id }}"
+                onclick="return confirm('Удалить строку «{{ m.label }}»?')">
+          Удалить строку
+        </button>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="row mt-3">
+    <div class="col-md-3 text-muted">Цена Stage</div>
+    <div class="col-md-3">
+      <input class="form-control" name="price" value="{{ s.price }}">
+      <div class="form-text">Пусто — «по запросу»</div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary mt-3">Сохранить</button>
+</form>
+
+{% for m in s.metrics.all %}
+  <form id="del-m-{{ m.id }}" method="post" action="{% url 'catalog:m_chip_detail' cfg.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="del_metric">
+    <input type="hidden" name="metric_id" value="{{ m.id }}">
+  </form>
+{% endfor %}
+
+<form method="post" class="mt-2">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="add_metric">
+  <input type="hidden" name="stage_id" value="{{ s.id }}">
+  <div class="input-group">
+    <input class="form-control" name="new_label" placeholder="Добавить новую строку (название параметра)">
+    <button class="btn btn-outline-secondary">Добавить</button>
+  </div>
+</form>
+
+    </div>
+  </div>
+{% endfor %}
+
+
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ n.title }}{% endblock %}
+
+{% block content %}
+
+
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / <a href="{% url 'catalog:page_contacts' %}">Контакты</a> / <a href="{% url 'catalog:page_news' %}">Новости</a>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <div class="deliv_and_pay">
+                    <h2>{{ n.title }}</h2>
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{% static 'img/User_Circle.svg' %}" alt="">
+                        <div class="text-muted small">
+                        {% if n.author %}
+                            <span class="me-2">{{ n.author }}</span>
+                        {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img src="{{ n.image.url }}" alt="{{ n.title }}" class="img-fluid rounded">
+                        </div>
+                        <div class="col-md-6">
+                            {% if n.excerpt %}
+                            <p class="lead mt-3">{{ n.excerpt }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-12 mb-5">
+                            {{ n.body|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">Заявки на чип-тюнинг</h4>
+    <form class="d-flex gap-2" method="get">
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Поиск: имя/телефон/модель">
+      <select class="form-select" name="status">
+        <option value="">Все статусы</option>
+        {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+        </select>
+
+      <button class="btn btn-outline-primary">Фильтр</button>
+    </form>
+  </div>
+  <hr>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>#</th><th>Дата</th><th>Имя</th><th>Телефон</th><th>Модификация</th><th>Stage</th><th>Статус</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in page_obj.object_list %}
+        <tr>
+          <td>{{ lead.id }}</td>
+          <td>{{ lead.created_at|date:"d.m.Y H:i" }}</td>
+          <td>{{ lead.name }}</td>
+          <td>{{ lead.phone }}</td>
+          <td>{{ lead.car.make }} {{ lead.car.model }} {{ lead.car.year }} {{ lead.car.engine }}</td>
+          <td>{% if lead.stage %}{{ lead.stage.name }}{% else %}—{% endif %}</td>
+          <td>{{ lead.get_status_display }}</td>
+          <td><a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:m_chip_lead_detail' lead.id %}">Подробнее</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-muted">Заявок пока нет.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav>
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status }}">«</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Стр. {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status }}">»</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

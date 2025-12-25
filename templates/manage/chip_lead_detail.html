@@ -1,0 +1,44 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <h4 class="mb-1">Заявка #{{ lead.id }}</h4>
+  <div class="text-muted">Создано: {{ lead.created_at|date:"d.m.Y H:i" }}</div>
+  <hr>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="border rounded p-3">
+        <h6 class="mb-3">Клиент</h6>
+        <div><strong>Имя:</strong> {{ lead.name }}</div>
+        <div><strong>Телефон:</strong> {{ lead.phone }}</div>
+        {% if lead.user %}
+          <div><strong>Пользователь:</strong> {{ lead.user.username }} (id {{ lead.user.id }})</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="border rounded p-3">
+        <h6 class="mb-3">Модификация</h6>
+        <div>{{ lead.car.make }} {{ lead.car.model }}</div>
+        <div>{{ lead.car.year }}</div>
+        <div>{{ lead.car.engine }}</div>
+        <div>Stage: {% if lead.stage %}{{ lead.stage.name }}{% else %}—{% endif %}</div>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <form method="post" class="d-flex align-items-end gap-2">
+    {% csrf_token %}
+    <div>
+      <label class="form-label">Статус</label>
+      <select name="status" class="form-select">
+        {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if lead.status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+        </select>
+
+    </div>
+    <button class="btn btn-primary">Сохранить</button>
+    <a class="btn btn-outline-secondary" href="{% url 'catalog:m_chip_leads' %}">К списку</a>
+  </form>
+</div>
+{% endblock %}

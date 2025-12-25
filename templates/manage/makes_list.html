@@ -1,0 +1,65 @@
+{% extends "manage/base_admin.html" %}
+{% load static %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">Марки авто</h4>
+    
+  </div>
+
+  <hr>
+
+  <form action="{% url 'catalog:m_make_add' %}" method="post" class="row g-2">
+    {% csrf_token %}
+    <div class="col-md-6">
+      <input type="text" name="name" class="form-control" placeholder="Название марки (например, BMW)">
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary">Добавить</button>
+    </div>
+  </form>
+
+  <hr>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th style="width: 80px;">Логотип</th>
+          <th>Название</th>
+          <th>Slug</th>
+          <th style="width: 320px;">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in items %}
+          <tr>
+            <td>
+              {% if m.logo %}
+                <img src="{{ m.logo.url }}" alt="" style="max-height:40px;max-width:80px;object-fit:contain;">
+              {% else %}
+                <span class="text-muted">нет</span>
+              {% endif %}
+            </td>
+            <td>{{ m.name }}</td>
+            <td><code>{{ m.slug }}</code></td>
+            <td>
+              <form action="{% url 'catalog:m_make_logo' m.id %}" method="post" enctype="multipart/form-data" class="d-inline-flex align-items-center gap-2">
+                {% csrf_token %}
+                <input type="file" name="logo" class="form-control form-control-sm" accept="image/*" style="max-width:220px">
+                <button class="btn btn-sm btn-outline-secondary">Загрузить логотип</button>
+              </form>
+              <form action="{% url 'catalog:m_make_delete' m.id %}" method="post" class="d-inline" onsubmit="return confirm('Удалить марку?');">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-danger">Удалить</button>
+              </form>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted">Список пуст.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

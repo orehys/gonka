@@ -1,0 +1,91 @@
+{# templates/manage/orders_list.html #}
+{% extends "manage/base_admin.html" %}
+{% load money %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto"><input class="form-control" name="q" value="{{ q }}" placeholder="ID/email/имя/телефон"></div>
+    <div class="col-auto">
+      <select class="form-select" name="status">
+        <option value="">Все статусы</option>
+        {% for k, v in status_choices %}
+            <option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+        </select>
+
+    </div>
+    <div class="col-auto"><button class="btn btn-primary">Фильтр</button> <a class="btn btn-outline-secondary" href="{% url 'catalog:m_orders' %}">Сброс</a></div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>ID</th><th>Клиент</th><th>Контакты</th><th>Сумма</th><th>Статус</th><th>Товары (до 3 фото)</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+  {% for o, form in rows %}
+    <tr>
+      <td>{{ o.id }}</td>
+      <td>{{ o.name }}</td>
+      <td>{{ o.email }}<br>{{ o.phone }}</td>
+      <td class="fw-bold">{{ o.total|money }}</td>
+
+      <td style="min-width:180px">
+        <form action="{% url 'catalog:m_order_status' o.id %}"
+              method="post" class="d-flex gap-1 align-items-center">
+          {% csrf_token %}
+          {{ form.status }}   {# или просто {{ form }} если хочешь всю форму #}
+          <button class="btn btn-sm btn-outline-primary">Ок</button>
+        </form>
+      </td>
+
+      <td style="min-width:220px">
+        <div class="d-flex gap-1">
+          {% for it in o.items.all|slice:":3" %}
+            {% with img=it.product.images.all.0 %}
+              {% if img %}
+                <img src="{{ img.image.url }}" style="width:64px;height:64px;object-fit:cover;border-radius:6px">
+              {% endif %}
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </td>
+
+      <td>
+        <details>
+          <summary>Подробнее</summary>
+          <div class="mt-2 small">
+            <div><b>Адрес:</b> {{ o.city }}; {{ o.address }}</div>
+            <div><b>Доставка:</b> {{ o.delivery }}; <b>Оплата:</b> {{ o.payment }}</div>
+            <div><b>Комментарий:</b> {{ o.comment|default:"—" }}</div>
+            <hr class="my-2">
+            {% for it in o.items.all %}
+              <div>• {{ it.title }} × {{ it.qty }} = {{ it.price|money }}</div>
+            {% endfor %}
+          </div>
+        </details>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="8" class="text-muted">Заказов нет</td></tr>
+  {% endfor %}
+</tbody>
+
+    </table>
+  </div>
+
+  <nav>
+    <ul class="pagination pagination-sm">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?q={{ q }}&status={{ status }}&page={{ page_obj.previous_page_number }}">‹</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?q={{ q }}&status={{ status }}&page={{ page_obj.next_page_number }}">›</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}

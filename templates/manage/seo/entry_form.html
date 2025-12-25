@@ -1,0 +1,57 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<h4>{% if obj %}Правка SEO #{{ obj.id }}{% else %}Новая SEO-запись{% endif %}</h4>
+<form method="post" class="row g-3">{% csrf_token %}
+  <div class="col-12">
+    <label class="form-check">
+      {{ form.is_active }} <span class="ms-1">Активна</span>
+    </label>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Content type</label>
+    {{ form.content_type }}
+  </div>
+  <div class="col-md-2">
+    <label class="form-label">Object ID</label>
+    {{ form.object_id }}
+    <div class="form-text">Либо заполните паттерн ниже</div>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">path_regex</label>
+    {{ form.path_regex }}
+  </div>
+
+  <div class="col-12"><hr></div>
+
+  <div class="col-md-6">
+    <label class="form-label">Title</label>
+    {{ form.title }}
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">H1</label>
+    {{ form.h1 }}
+  </div>
+  <div class="col-md-8">
+    <label class="form-label">Meta description</label>
+    {{ form.meta_description }}
+  </div>
+  <div class="col-md-4">
+    <label class="form-label">Canonical URL</label>
+    {{ form.canonical_url }}
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">index</label>
+    {{ form.robots_index }}
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">follow</label>
+    {{ form.robots_follow }}
+  </div>
+
+  <div class="col-12">
+    <button class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'catalog:m_seo_entries' %}" class="btn btn-outline-secondary">Отмена</a>
+  </div>
+</form>
+{% endblock %}

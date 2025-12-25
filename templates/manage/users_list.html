@@ -1,0 +1,50 @@
+{# templates/manage/users_list.html #}
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto"><input class="form-control" name="q" value="{{ q }}" placeholder="Поиск логин/email/ФИО/телефон/город"></div>
+    <div class="col-auto"><button class="btn btn-primary">Искать</button> <a class="btn btn-outline-secondary" href="{% url 'catalog:m_users' %}">Сброс</a></div>
+  </form>
+  
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>ID</th><th>Логин</th><th>Email</th><th>ФИО</th><th>Телефон</th><th>Город</th><th>Дата регистрации</th><th>Последний вход</th><th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.username }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.profile.full_name }}</td>
+          <td>{{ u.profile.phone }}</td>
+          <td>{{ u.profile.city }}</td>
+          <td>{{ u.date_joined|date:"d.m.Y H:i" }}</td>
+          <td>{{ u.last_login|date:"d.m.Y H:i" }}</td>
+          <td>{% if u.is_active %}<span class="badge text-bg-success">активен</span>{% else %}<span class="badge text-bg-secondary">заблокирован</span>{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-muted">Нет пользователей</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <nav>
+    <ul class="pagination pagination-sm">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page_obj.previous_page_number }}">‹</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?q={{ q }}&page={{ page_obj.next_page_number }}">›</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}

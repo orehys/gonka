@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static money %}
+{% load textfmt %}
+{% block content %}
+<style>
+    .one_like_har img { transition: transform .2s ease; }
+.one_like_har.is-open img { transform: rotate(180deg); } /* или 180°, как тебе нужно */
+
+</style>
+
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / <a href="{% url 'catalog:account_profile' %}">Личный кабинет</a> / Избранное
+                </div>
+            </div>
+            
+            <div class="col-xl-12">
+            <div class="user_like_page mt-0">
+                {% for product in page_obj %}
+                <div class="one_like">
+                    {% with img=product.images.all.0 %}
+                    {% if img %}<img src="{{ img.image.url }}" alt="{{ product.title }}" class="one_like_img">{% else %}
+                              <img src="{% static 'img/placeholder.png' %}" loading="lazy">{% endif %}
+                    {% endwith %}
+                    <div>
+                        <a href="{% url 'catalog:product_detail' product.slug %}"><h2 class="d-md-block d-none">{{ product.title }}</h2></a>
+                        <div class="one_like_art_nal">
+                            <h3>{{ product.sku }}</h3>
+                            {% if product.in_stock %}
+                            <h4 style="color: #5FC35D; font-weight: 400;">Есть в наличии</h4>
+                            <img src="{% static 'img/Check.svg' %}" alt="">
+                            {% else %}
+                            <h4>Под заказ</h4>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'catalog:product_detail' product.slug %}"><h5>{{ product.description|trunc50_3dots }}</h5></a>
+                        <div class="one_like_har" style="cursor: pointer;">
+                            <h6>Характеристики</h6>
+                            <img src="{% static 'img/strel_sum.svg' %}" alt="">
+                        </div>
+                        <div class="characteristics d-none">
+                              {% for name, values in product.specs %}
+                                <div class="item">
+                                <span class="label">{{ name }}:</span>
+                                <div class="dots-container"><span class="dots"></span></div>
+                                <span class="value">{{ values|join:", " }}</span>
+                                </div>
+                            {% empty %}
+                                <div class="text-muted">Нет характеристик</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="right md_left">
+                        <h2 class="d-md-none d-block" style="min-width: 200px;">{{ product.title }}</h2>
+                        <div class="main_price_one_like">
+                            {{ product.price|money }}
+                        </div>
+                        <p>{{ product.price|old_price|money }}</p>
+                        <div class="one_like_btn">
+                            <form action="{% url 'catalog:favorite_toggle' product.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="" style="width:max-content;background:transparent;margin-left:0;padding:0"><img src="{% static 'img/Heart_01.svg' %}" alt=""></button>
+                            </form>
+                            
+                            {% if product.id in cart_ids %}
+                                <button class="btn-success" style="background: #28a745;">Добавлено</button>
+                                {% else %}
+                                <form action="{% url 'catalog:cart_add' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="qty" value="1">
+                                    <button type="submit" style="position:relative;z-index:4;">В корзину</button>
+                                </form>
+                                {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.one_like_har').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const box = hdr.nextElementSibling;
+      if (!box || !box.classList.contains('characteristics')) return;
+      box.classList.toggle('d-none');
+      hdr.classList.toggle('is-open');
+    });
+  });
+});
+</script>
+
+{% endblock %}

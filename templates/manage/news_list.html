@@ -1,0 +1,81 @@
+{% extends "manage/base_admin.html" %}
+{% load static %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <div class="d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">Новости</h4>
+    <a href="{% url 'catalog:m_news_new' %}" class="btn btn-primary btn-sm">+ Добавить новость</a>
+  </div>
+
+  <form class="row g-2 mt-3 mb-2">
+    <div class="col-md-4">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Поиск по заголовку и тексту">
+    </div>
+    <div class="col-md-2">
+      <button class="btn btn-outline-secondary w-100">Искать</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th style="width:80px">Обложка</th>
+          <th>Заголовок</th>
+          <th style="width:160px">Публикация</th>
+          <th style="width:190px" class="text-end">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in page_obj.object_list %}
+        <tr>
+          <td>
+            {% if n.image %}
+              <img src="{{ n.image.url }}" class="rounded" style="width:64px;height:48px;object-fit:cover">
+            {% endif %}
+          </td>
+          <td>
+            <div class="fw-semibold">{{ n.title }}</div>
+            <div class="text-muted small">{{ n.excerpt|default:n.body|truncatechars:120 }}</div>
+          </td>
+          <td>
+            <div>{{ n.published_at|date:"d.m.Y H:i" }}</div>
+            <span class="badge {% if n.is_published %}bg-success{% else %}bg-secondary{% endif %}">
+              {% if n.is_published %}Опубликовано{% else %}Скрыто{% endif %}
+            </span>
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'catalog:m_news_edit' n.id %}">Править</a>
+            <form action="{% url 'catalog:m_news_toggle' n.id %}" method="post" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm {% if n.is_published %}btn-outline-warning{% else %}btn-success{% endif %}">
+                {% if n.is_published %}Скрыть{% else %}Опубликовать{% endif %}
+              </button>
+            </form>
+            <form action="{% url 'catalog:m_news_delete' n.id %}" method="post" class="d-inline"
+                  onsubmit="return confirm('Удалить новость «{{ n.title }}»?')">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger">Удалить</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted">Пока нет новостей.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-2">
+    <ul class="pagination mb-0">
+      {% for p in page_items %}
+        <li class="page-item {% if p == page_obj.number %}active{% endif %}">
+          <a class="page-link" href="?page={{ p }}{% if q %}&q={{ q|urlencode }}{% endif %}">{{ p }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

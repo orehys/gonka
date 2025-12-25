@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block content %}
+{% load money static %}
+<style>
+    .carservice_about_text p{
+        text-align: justify ! important;
+    } 
+</style>
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / <a href="{% url 'page_avtoservis_short' %}">Автосервис</a> / <a href="{% url 'page_avtoservis_info_short' %}">О сервисе</a>
+                </div>
+            </div>
+            <div class="col-lg-3 d-lg-block d-none">
+                <div class="carservice_menu">
+                    <p><a href="{% url 'page_chip_tuning_short' %}">Чиптюнинг</a></p>
+                </div>
+            </div>
+            <style>
+                        .main .owl-carousel { position: relative; }
+                        .main .owl-dots {
+                        position: absolute;
+                        left: 0; right: 0; bottom: 16px;
+                        display: flex; justify-content: center; gap: 8px;
+                        }
+                        .main .owl-dot span {
+                        width: 10px; height: 10px; border-radius: 50%;
+                        background: #fff; opacity: .5; display: block;
+                        }
+                        .main .owl-dot.active span { opacity: 1; }
+
+                        .main-hero-img {
+                        display: block;
+                        width: 100%;
+                        }
+                        .owl-theme .owl-dots .owl-dot span{
+                            background: white;
+                        }
+
+                    </style>
+            <div class="col-lg-9">
+<form action="" method="post" class="carservice_form_con" style="margin-bottom: 24px;" data-autodealer="service">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-sm-6">
+                    <h4>Имя <span>*</span></h4>
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Введите как мы можем к вам обращаться..."
+                        class="mb-3 mb-sm-0"
+                        required
+                        value="{{ form.name.value|default_if_none:'' }}"
+                    >
+                    </div>
+
+                    <div class="col-sm-6">
+                    <h4>Телефон <span>*</span></h4>
+                    <input
+                        type="text"
+                        name="phone"
+                        placeholder="Введите ваш телефон..."
+                        required
+                        value="{{ form.phone.value|default_if_none:'' }}"
+                    >
+                    </div>
+
+                    <div class="col-12">
+                    <h4 style="margin-top: 18px;">Комментарий <span>*</span></h4>
+                    <textarea
+                        name="comment"
+                        required
+                        placeholder="Распишите перечень работ по вашему автомобилю..."
+                    >{{ form.comment.value|default_if_none:'' }}</textarea>
+
+                    <div class="pd-consent-wrap">
+                        <label class="pd-consent">
+                        <input
+                            type="checkbox"
+                            class="pd-consent__cb"
+                            name="pd_consent"
+                            required
+                            style="width: auto; height: auto; margin-top: 0;"
+                            {% if form.pd_consent.value %}checked{% endif %}
+                        >
+                        <span>
+                            Я согласен(на) на обработку персональных данных
+                            <a href="{% url 'page_agreement_short' %}" target="_blank" rel="noopener">— подробные условия</a>
+                        </span>
+                        </label>
+                        <div class="pd-consent__error" aria-live="polite"></div>
+                    </div>
+
+                    <div class="mt-3">
+                        <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <button>Отправить</button>
+                        
+                    </div>
+                    </div>
+                </div>
+                </form>
+
+                <div class="carservice_about_text">
+                    {% if page %}{{ page.content_html|safe }}{% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+  $(function () {
+    $('.main-hero').owlCarousel({
+      items: 1,
+      loop: true,
+      autoplay: true,
+      autoplayTimeout: 3000,
+      autoplayHoverPause: true,
+      dots: false,
+      nav: false,
+      smartSpeed: 600,
+      touchDrag: true,
+      mouseDrag: true
+    });
+  });
+</script>
+{% endblock %}

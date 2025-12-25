@@ -1,0 +1,44 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h4>Редиректы</h4>
+</div>
+
+<form class="row g-2 mb-3" method="post">{% csrf_token %}
+  <div class="col-md-3">{{ form.is_active.label_tag }} {{ form.is_active }}</div>
+  <div class="col-md-3">{{ form.from_path.label_tag }} {{ form.from_path }}</div>
+  <div class="col-md-3">{{ form.to_url.label_tag }} {{ form.to_url }}</div>
+  <div class="col-md-2">{{ form.code.label_tag }} {{ form.code }}</div>
+  <div class="col-md-1">{{ form.priority.label_tag }} {{ form.priority }}</div>
+  <div class="col-12"><button class="btn btn-primary btn-sm">Добавить</button></div>
+</form>
+
+<form class="my-2" method="get">
+  <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск по from/to">
+</form>
+
+<table class="table table-sm align-middle">
+  <thead><tr><th>ID</th><th>On</th><th>From</th><th>→</th><th>To</th><th>Code</th><th>Priority</th><th></th></tr></thead>
+  <tbody>
+    {% for r in page_obj.object_list %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{% if r.is_active %}✅{% else %}—{% endif %}</td>
+      <td><code>{{ r.from_path }}</code></td>
+      <td>→</td>
+      <td>{{ r.to_url }}</td>
+      <td>{{ r.code }}</td>
+      <td>{{ r.priority }}</td>
+      <td class="text-end">
+        <form method="post" action="{% url 'catalog:m_redirect_delete' r.id %}">{% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?')">Удалить</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" class="text-muted">Пока нет правил</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

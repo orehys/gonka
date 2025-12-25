@@ -1,0 +1,1201 @@
+
+{% load static seo %}
+{% get_seo as seo %}
+
+<title>{% if seo.title %}{{ seo.title }}{% else %}Gonka{% endif %}</title>
+{% if seo.description %}
+  <meta name="description" content="{{ seo.description }}">
+{% endif %}
+{% if seo.robots %}
+  <meta name="robots" content="{{ seo.robots }}">
+{% endif %}
+{% if seo.canonical %}
+  <link rel="canonical" href="{{ seo.canonical }}">
+{% endif %}
+
+{% if seo.json_ld %}{{ seo.json_ld|safe }}{% endif %}
+
+<!doctype html>
+<html lang="ru">
+<head>
+    
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" name="viewport">
+
+ 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <meta name="keywords" content="">
+    <link rel="shortcut icon" href="{% static 'img/favicon.svg' %}">
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link href="{% static 'css/owl.carousel.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link  href="https://cdnjs.cloudflare.com/ajax/libs/fotorama/4.6.4/fotorama.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/assets/owl.theme.default.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
+</head>
+<style>
+    .bottom_mob_panel{
+        position: fixed;
+        height: 75px;
+        width: 100%;
+        bottom: 0px;
+        right: 0px;
+        background-color: white;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-right: 45px;
+        padding-left: 45px;
+        box-shadow: 0px -1px 10px 0px rgba(0, 0, 0, 0.02);
+        border-top: 2px solid rgba(248, 248, 248, 1);
+    }
+    /* Обёртка */
+    .custom-select-wrapper{
+      position: relative;
+      background-color:#4339DA; /* фиолетовый фон кнопки */
+      border-radius:12px;
+      color:#fff;
+      min-width: 138px;
+    }
+
+    /* Нативное поле (скрываем дефолтные украшения, оставляем вид под фон) */
+    .custom-select{
+      appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      background-color:transparent; color:#fff;
+      border:none; outline:none; box-shadow:none;
+      width:100%;
+      padding:10px 44px 10px 14px;
+      font:400 14px/18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    }
+
+    /* Цвет опций (когда браузер покажет нативное меню) */
+    .custom-select option{ color:#111; }
+
+    /* Кастомная стрелка поверх */
+    .custom-select-wrapper::after{
+      content:""; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+      width:20px; height:20px; pointer-events:none; opacity:.9;
+      background-image:url("{% static 'img/Caret_Down_MD.svg' %}");
+      background-repeat:no-repeat; background-position:center; background-size:contain;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .custom-select-wrapper.is-open::after{ transform:translateY(-50%) rotate(180deg); }
+
+    /* ——— КАСТОМНОЕ МЕНЮ (только для шапки каталога) ——— */
+    .catalog-selectify{ position:relative; width:100%; }
+    .catalog-selectify.is-disabled{ opacity:.6; pointer-events:none; }
+
+    /* Кнопка-заменитель (фиолетовая капсула) */
+    .catalog-selectify__btn{
+      width:100%; text-align:left; cursor:pointer;
+      background:#4339DA; color:#fff;
+      border:none; border-radius:12px; outline:none;
+      padding:10px 44px 10px 14px;
+      font:400 14px/18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    }
+
+    /* Выпадающий список */
+    .catalog-selectify__list{
+      position:absolute; z-index:60; left:0; right:0; top:calc(100% + 8px);
+      background:#fff; color:#111;
+      border:1px solid #E6E6E6; border-radius:12px;
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      max-height:320px; overflow:auto; padding:4px;
+      display:none;
+    }
+    .catalog-selectify.is-open .catalog-selectify__list{ display:block; }
+
+    /* Пункты */
+    .catalog-selectify__opt {
+    padding: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 14px;
+}
+    .catalog-selectify__opt:hover,
+    .catalog-selectify__opt[aria-selected="true"]{ background:#F4F4F4; }
+
+    /* Плейсхолдер (если будешь использовать) */
+    .catalog-selectify__placeholder{ opacity:.85; }
+
+    /* Вращение стрелки у вашей обёртки, когда открыт список */
+    .custom-select-wrapper.is-open::after{
+      transform:translateY(-50%) rotate(180deg);
+    }
+
+
+</style>
+<header class="" id="header">
+
+
+    <div class="container menu">
+        <div class="phone_header">
+            <img src="{% static 'img/phone.svg' %}" alt="">
+            <p><a href="tel:+7777777777" style="color: #666666;">+7-777-777-77-70</a></p>
+        </div>
+        <div class="logo_header">
+            <a href="/"><img src="{% static 'img/logo_pur.svg' %}" style="width: 158px;" alt=""></a>
+        </div>
+        <div class="icons_header">
+            <div class="search-container">
+                <!-- Форма поиска -->
+                <form class="search-form" action="{% url 'catalog:product_list' %}" method="get">
+                    <input
+                    type="text"
+                    name="q"
+                    value="{{ request.GET.q|default_if_none:'' }}"
+                    placeholder="Поиск по названию или SKU"
+                    class="search-input"
+                    autocomplete="off"
+                    >
+                    <button type="submit" class="search-submit"><img src="{% static 'img/find.svg' %}" alt="Поиск"></button>
+
+                    {# опционально: сохранять выбранные фильтры из каталога, если они есть #}
+                    {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+                    {% if sub %}<input type="hidden" name="sub" value="{{ sub }}">{% endif %}
+                    {% if order %}<input type="hidden" name="order" value="{{ order }}">{% endif %}
+                    {% if brand %}<input type="hidden" name="brand" value="{{ brand }}">{% endif %}
+                    {% if make %}<input type="hidden" name="make" value="{{ make }}">{% endif %}
+                    {% if model %}<input type="hidden" name="model" value="{{ model }}">{% endif %}
+                    {% if engine %}<input type="hidden" name="engine" value="{{ engine }}">{% endif %}
+                </form>
+                </div>
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'catalog:account_profile' %}">
+                <img src="{% static 'img/user.svg' %}" alt="Личный кабинет">
+            </a>
+            {% else %}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <img src="{% static 'img/user.svg' %}" alt="Войти">
+            </a>
+            {% endif %}
+            <a href="{% url 'catalog:favorites' %}"><img src="{% static 'img/like.svg' %}" alt=""></a>
+            <div class="cart-icon" style="position:relative">
+            <a href="{% url 'catalog:cart_detail' %}">
+              <img src="{% static 'img/shop.svg' %}" alt="">
+            </a>
+            <span class="cart-badge badge js-cart-badge"
+                  {% if cart_count|default:0 == 0 %}style="display:none"{% endif %}>
+              {{ cart_count|default:0 }}
+            </span>
+          </div>
+            <style>
+                .cart-badge{
+                    display:inline-block; min-width:18px; padding:2px 6px; border-radius:10px;
+                    background:#ff3b30; color:#fff; font-size:12px; line-height:1; text-align:center;position: absolute;
+                    }
+                    html { scroll-behavior: smooth; }
+
+            </style>
+        </div>
+    </div>
+    <div class="container">
+        <div class="second_menu">
+            {% if request.user.is_staff %}
+              <a href="{% url 'catalog:m_dashboard' %}" class="ms-3">Админка</a>
+            {% endif %}
+
+            <div class="custom-select-wrapper">
+              <select class="custom-select js-catalog-selectify"
+                      onchange="if(this.value){ window.location.href=this.value; this.selectedIndex=0; }">
+                <option value="{% url 'catalog:product_list' %}">Каталог</option>
+                {% for cat in header_cats %}
+                  <option value="{% url 'catalog:product_list' %}?cat={{ cat.slug }}">{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <a href="{% url 'page_avtoservis_info_short' %}"><p>Автосервис</p></a>
+            <a href="{% url 'page_dynostand_short' %}"><p>Диностенд</p></a>
+            <a href="{% url 'page_help_short' %}"><p>Доставка и оплата</p></a>
+            <a href="{% url 'page_news_short' %}"><p>Новости</p></a> 
+            <a href="{% url 'page_contacts_short' %}"><p>Контакты</p></a>
+            
+        </div>
+        
+    </div>
+            <div class="hamburger-menu"> 
+            <div class=""> 
+                <div class="hamburger_menu_position"> 
+                    <a href="/"><img src="{% static 'img/mob_logo.png' %}" alt="" style="width: 170px;"> </a>
+                <div style="margin-right: 44px;"> 
+                  
+                    <a id="open_mobile_menu"><img src="{% static 'img/find.svg' %}" alt=""></a>
+                        {% if request.user.is_authenticated %}
+            <a href="{% url 'catalog:account_profile' %}">
+                <img src="{% static 'img/user.svg' %}" alt="Личный кабинет">
+            </a>
+            {% else %}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <img src="{% static 'img/user.svg' %}" alt="Войти">
+            </a>
+            {% endif %}
+            <div class="cart-icon--mobile" style="position:relative;     display: inline-block; margin-right: 18px;">
+                    <a href="{% url 'catalog:cart_detail' %}">
+                      <img src="{% static 'img/shop.svg' %}" alt="">
+                    </a>
+                    <span class="cart-badge badge js-cart-badge"
+                          {% if cart_count|default:0 == 0 %}style="display:none"{% endif %}>
+                      {{ cart_count|default:0 }}
+                    </span>
+                  </div>
+                        <a href="{% url 'catalog:favorites' %}"><img src="{% static 'img/like.svg' %}" alt=""></a>
+                </div> 
+            </div> 
+        </div> 
+                    <input id="menu__toggle" type="checkbox"/> 
+                    <label class="menu__btn" for="menu__toggle"> 
+                      <span></span> 
+                    </label> 
+ 
+                    <ul class="menu__box"> 
+                        <div class="hamburger_menu_position"> 
+                            <a href="/"><img src="{% static 'img/mob_logo.png' %}" alt="" style="width: 170px;"> </a>
+                        <div style="margin-right: 44px;"> 
+                                {% if request.user.is_authenticated %}
+            <a href="{% url 'catalog:account_profile' %}">
+                <img src="{% static 'img/user.svg' %}" alt="Личный кабинет">
+            </a>
+            {% else %}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <img src="{% static 'img/user.svg' %}" alt="Войти">
+            </a>
+            {% endif %}
+            <div class="cart-icon--mobile" style="position:relative;     display: inline-block; margin-right: 18px;">
+                    <a href="{% url 'catalog:cart_detail' %}">
+                      <img src="{% static 'img/shop.svg' %}" alt="">
+                    </a>
+                    <span class="cart-badge badge js-cart-badge"
+                          {% if cart_count|default:0 == 0 %}style="display:none"{% endif %}>
+                      {{ cart_count|default:0 }}
+                    </span>
+                  </div>
+                                <a href="{% url 'catalog:favorites' %}"><img src="{% static 'img/like.svg' %}" alt=""></a>
+                        </div> 
+                    </div> 
+                        <div class="mob_ham_menu"> 
+                            <div class="one_promo_cart mob_ham_menu_search"> 
+                                <form class="" action="{% url 'catalog:product_list' %}" method="get">
+                    <input
+                    type="text"
+                    name="q"
+                    value="{{ request.GET.q|default_if_none:'' }}"
+                    placeholder="Поиск по названию или SKU"
+                    class="search-input"
+                    autocomplete="off"
+                    style="width: 85%;"
+                    >
+                    <button type="submit" class="search-submit"><img src="{% static 'img/find.svg' %}" alt="Поиск"></button>
+
+                    {# опционально: сохранять выбранные фильтры из каталога, если они есть #}
+                    {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+                    {% if sub %}<input type="hidden" name="sub" value="{{ sub }}">{% endif %}
+                    {% if order %}<input type="hidden" name="order" value="{{ order }}">{% endif %}
+                    {% if brand %}<input type="hidden" name="brand" value="{{ brand }}">{% endif %}
+                    {% if make %}<input type="hidden" name="make" value="{{ make }}">{% endif %}
+                    {% if model %}<input type="hidden" name="model" value="{{ model }}">{% endif %}
+                    {% if engine %}<input type="hidden" name="engine" value="{{ engine }}">{% endif %}
+                </form>
+                            </div> 
+                            <div class="choose_categories mob_ham_menu_categories"> 
+                                <details> 
+                                    <summary>Личный кабинет</summary> 
+                                    <p><a href="{% url 'catalog:account_profile' %}">Личные данные</a></p> 
+                                    <p><a href="{% url 'catalog:favorites' %}">Избранное</a></p> 
+                                    <p><a href="{% url 'catalog:cart_detail' %}">Корзина</a></p> 
+                                </details> 
+                                <details> 
+                                    <summary>Каталог</summary> 
+                                    <a href="{% url 'catalog:product_list' %}"><p>Весь каталог</p></a>
+                                    {% for cat in header_cats %}
+                                  <a href="{% url 'catalog:product_list' %}?cat={{ cat.slug }}"><p>{{ cat.name }}</p></a>
+                                  {% endfor %}
+                                </details> 
+                                <details> 
+                                    <summary>Автосервис</summary> 
+                                  
+                                    <p><a href="{% url 'page_chip_tuning_short' %}">Чиптюнинг</a></p> 
+                                    <p><a href="{% url 'page_avtoservis_info_short' %}">О сервисе</a></p> 
+                                   
+                                </details> 
+                                <details> 
+                                    <summary>Диностенд</summary> 
+                                    <p><a href="{% url 'page_dynostand_short' %}">Диностенд</a></p> 
+                                 
+                                </details> 
+                                <details> 
+                                    <summary>Доставка и оплата</summary> 
+                                    <p><a href="{% url 'page_help_short' %}">FAQ</a></p> 
+                                    <p><a href="{% url 'catalog:page_delivery' %}">Условия доставки</a></p> 
+                                    <p><a href="{% url 'catalog:page_payment' %}">Условия оплаты</a></p> 
+                                </details> 
+                                
+                                <details> 
+                                    <summary>Контакты</summary> 
+                                    <p><a href="{% url 'page_contacts_short' %}">Контакты</a></p> 
+                                    <p><a href="{% url 'page_news_short' %}">Новости</a></p> 
+                                  
+                                </details> 
+                            </div> 
+                            <div class="we_need_help_mob"> 
+                                Нужна помощь? 
+                            </div> 
+
+                            <a href="tel:+7777777777"><div class="we_need_help_mob_tg"> 
+                                +7-777-777-77-70
+                            </div> </a>
+                        </div> 
+                        
+</header>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/owl.carousel@2.3.4/dist/owl.carousel.min.js"></script>
+<!-- Cookie banner -->
+<div id="cookieBanner" class="cookie-banner" role="dialog" aria-live="polite" aria-label="Уведомление о файлах cookie" hidden>
+  <div class="cookie-banner__content">
+    <div class="cookie-banner__text">
+      Мы используем файлы cookie, чтобы сайт работал корректно и удобнее для вас. <a href="/cookie/">Подробнее</a>
+    </div>
+    <div class="cookie-banner__actions">
+      <button id="cookieAccept" class="btn btn-accept">Принять</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.cookie-banner{
+  position: fixed; left: 16px; right:16px; bottom:16px; z-index:9999;
+  background:#fff; border:1px solid rgba(0,0,0,.08); border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+.cookie-banner__content{ display:flex; gap:16px; padding:16px; align-items:center; }
+.cookie-banner__text{ flex:1; color:#222 }
+.cookie-banner__text a{ color:#0d6efd; text-decoration:underline }
+.cookie-banner__actions{ display:flex; gap:8px; flex-wrap:wrap }
+.btn{ cursor:pointer; padding:10px 14px; border-radius:8px; border:1px solid transparent; font-weight:600 }
+.btn-accept{ background:#28a745; color:#fff }
+.btn-accept:hover{ filter:brightness(.95) }
+.btn-decline{ background:#fff; color:#333; border-color:#ddd }
+.btn-decline:hover{ background:#f6f6f6 }
+@media (max-width:600px){
+  .cookie-banner__content{ flex-direction:column; align-items:stretch }
+  .cookie-banner__actions{ justify-content:stretch }
+  .btn{ width:100% }
+}
+</style>
+
+<script>
+(function(){
+  function getCookie(name){
+    return document.cookie.split('; ').find(row => row.startsWith(name+'='))?.split('=')[1];
+  }
+  function setCookie(name, value, days){
+    var d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    var secure = (location.protocol === 'https:') ? "; Secure" : "";
+    document.cookie = name + "=" + value + "; " + expires + "; path=/; SameSite=Lax" + secure;
+  }
+
+  var banner = document.getElementById('cookieBanner');
+  var accept = document.getElementById('cookieAccept');
+  var decline = document.getElementById('cookieDecline');
+
+  if(!getCookie('cookie_consent')){
+    banner.hidden = false;
+  }
+
+  function closeBanner(){
+    banner.hidden = true;
+  }
+
+  accept?.addEventListener('click', function(){
+    setCookie('cookie_consent','1', 365);
+    closeBanner();
+  });
+
+  decline?.addEventListener('click', function(){
+    setCookie('cookie_consent','0', 365);
+    closeBanner();
+  });
+
+  window.showCookieBanner = function(){ banner.hidden = false; };
+})();
+</script>
+<style>
+.pd-consent-wrap{margin-top:12px}
+.pd-consent{display:flex; gap:8px; align-items:center; font-size:14px; line-height:1.35}
+.pd-consent__cb{margin-top:3px}
+.pd-consent__error{color:#dc3545; font-size:13px; margin-top:4px; display:none}
+.pd-consent--invalid .pd-consent__error{display:block}
+.pd-consent__cb {
+  accent-color: #4339DA; 
+}
+
+</style>
+
+<script>
+(function(){
+  function getWrap(el){ return el.closest('.pd-consent-wrap'); }
+
+  function showError(cb, msg){
+    const wrap = getWrap(cb);
+    if (!wrap) return;
+    wrap.classList.add('pd-consent--invalid');
+    const err = wrap.querySelector('.pd-consent__error');
+    if (err) err.textContent = msg || 'Подтвердите согласие на обработку персональных данных.';
+    cb.focus({preventScroll:true});
+  }
+
+  function clearError(cb){
+    const wrap = getWrap(cb);
+    if (!wrap) return;
+    wrap.classList.remove('pd-consent--invalid');
+    const err = wrap.querySelector('.pd-consent__error');
+    if (err) err.textContent = '';
+  }
+
+  function checkFormConsent(form){
+    const cb = form.querySelector('input.pd-consent__cb[type="checkbox"]');
+    if (!cb) return true;              
+    if (cb.checked) { clearError(cb); return true; }
+    showError(cb);
+    return false;
+  }
+
+  document.addEventListener('submit', function(e){
+    const form = e.target.closest('form');
+    if (!form) return;
+    if (!checkFormConsent(form)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  document.addEventListener('change', function(e){
+    const cb = e.target;
+    if (cb && cb.matches('input.pd-consent__cb[type="checkbox"]') && cb.checked){
+      clearError(cb);
+    }
+  });
+
+  window.pdConsentOk = checkFormConsent;
+})();
+</script>
+
+<body>
+
+<div class="modal fade auth-modal" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3 p-sm-4">
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+
+      <div class="modal-body pt-2">
+        <h5 class="modal-title mb-1" id="loginModalLabel">Войдите в аккаунт</h5>
+        <div class="modal-subtitle mb-3">Авторизуйтесь для начала работы</div>
+
+        <form action="{% url 'catalog:login' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <!-- логин -->
+        <label class="form-label auth-label">Логин <span class="required-star">*</span></label>
+        <input type="text" name="username" class="form-control auth-input" placeholder="Введите ваш e-mail или логин">
+        <!-- пароль -->
+        <label class="form-label auth-label mt-3">Пароль <span class="required-star">*</span></label>
+        <input type="password" name="password" class="form-control auth-input" placeholder="Введите ваш пароль">
+        <div class="d-flex align-items-center justify-content-between mt-2">
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">Запомнить пароль</label>
+            </div>
+<a href="#" class="auth-link"
+   data-bs-toggle="modal"
+   data-bs-target="#forgotModal"
+   data-bs-dismiss="modal">Забыли пароль?</a>
+
+        </div>
+        <button type="submit" class="btn btn-login w-100">Войти</button>
+
+        <div class="text-center mt-3 auth-register-note">
+            Если у вас нет аккаунта — <a href="{% url 'catalog:register' %}" class="auth-link">Зарегистрируйтесь</a>
+        </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade auth-modal" id="forgotModal" tabindex="-1" aria-labelledby="forgotModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3 p-sm-4">
+      <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+
+      <div class="modal-body pt-2">
+        <h5 class="modal-title mb-1" id="forgotModalLabel">Восстановление пароля</h5>
+        <div class="modal-subtitle mb-3">Введите e-mail, на который зарегистрирован аккаунт</div>
+
+        <form action="{% url 'catalog:password_forgot' %}" method="post">
+          {% csrf_token %}
+          <label class="form-label auth-label">E-mail <span class="required-star">*</span></label>
+          <input type="email" name="email" class="form-control auth-input" placeholder="Введите ваш e-mail" required>
+
+          <button type="submit" class="btn btn-login w-100 mt-3">Получить новый пароль</button>
+
+          <div class="text-center mt-3 auth-register-note">
+            Вспомнили пароль?
+            <a href="#" class="auth-link"
+   data-bs-toggle="modal"
+   data-bs-target="#loginModal"
+   data-bs-dismiss="modal">Войти</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<style>
+  :root{
+    --Greyscale-Darkgrey:#1C1C1C;
+    --Greyscale-White:#FFF;
+    --Greyscale-Grey:#A4A4A6;
+    --Color-Red:#F00;
+    --Color-Violet:#4339DA;
+  }
+
+  .auth-modal .modal-content{
+    border: 0;
+    border-radius: 20px;
+  }
+
+  .auth-label{
+    color: var(--Greyscale-Darkgrey);
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0;
+  }
+  .required-star{ color: var(--Color-Red); }
+
+  .auth-input{
+    width:100%;
+    height:48px;
+    border-radius:12px;
+    background: var(--Greyscale-White);
+    backdrop-filter: blur(10px);
+    color: var(--Greyscale-Grey);
+    font-variant-numeric: lining-nums proportional-nums;
+    padding:12px;
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size:14px;
+    font-weight:400;
+    line-height:18px;
+    margin-top:8px;
+    border:none;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.06) inset;
+  }
+  .auth-input:focus{
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(67,57,218,.25) inset;
+  }
+  .auth-modal .modal-content {
+    border: 0;
+    border-radius: 20px;
+}
+.modal-content {
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 12px;
+}
+
+  .btn-login{
+    margin-top:24px;
+    border-radius:12px;
+    background: var(--Color-Violet);
+    border:none;
+    color: var(--Greyscale-White);
+    font-variant-numeric: lining-nums proportional-nums;
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size:14px;
+    font-weight:400;
+    line-height:18px;
+    height:48px;
+  }
+
+  .auth-link{ color: var(--Color-Violet); text-decoration: none; }
+  .auth-link:hover{ text-decoration: underline; }
+
+  .modal-title{
+    color: var(--Greyscale-Darkgrey);
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-weight:600;
+  }
+  .modal-subtitle{
+    color:#7D7D80;
+    font: 400 13px/1.2 Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+
+  .pass-eye{
+    position:absolute;
+    right:12px; bottom:6px;
+    width:36px; height:36px;
+    border:0; border-radius:8px;
+    background: transparent;
+    color:#7D7D80;
+    display:grid; place-items:center;
+  }
+  .pass-eye:hover{ background:#f2f2f4; }
+  @media(max-width: 992px){
+    .hamburger_menu_position{
+      box-shadow: 0px -1px 10px 0px rgba(0, 0, 0, 0.02);
+      border-bottom: 2px solid rgba(248, 248, 248, 1);
+    }
+  }
+  .autodealer-widget-side-wrapper{
+    display: none !important;
+  }
+  .autodealer-widget-side-wrapper.autodealer-widget-opened~.autodealer-widget-side-wrapper-fon{
+    background-color: transparent !important;
+  }
+  .autodealer-widget-button.BOTTOM_RIGHT{
+    display: none !important;
+  }
+  .loader-overlay{position:fixed;inset:0;background:rgba(255,255,255,.75);display:none;align-items:center;justify-content:center;z-index:9999}
+body.is-loading #page-loader{display:flex}
+.loader-spinner{width:48px;height:48px;border:4px solid #ddd;border-top-color:#333;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+{% if messages %}
+  <div class="container mt-2">
+    {% for m in messages %}<div class="alert py-2 mb-2 {% if 'логин и пароль' in m|lower %}text-danger fs-4{% endif %}">
+    {{ m }}
+  </div>{% endfor %}
+  </div>
+{% endif %}
+  <body>
+    {% block content %}{% endblock %}
+    <section class="footer pt-5 pb-sm-0 pb-5">
+        <div class="container pb-5">
+            <div class="row">
+
+
+                <div class="col-sm-3 col-6 mt-sm-0 mt-3">
+
+                    <a href="/"><img src="{% static 'img/footer.svg' %}" style="margin-top: 32px;" alt="" class="d-sm-block d-none"></a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="page-loader" class="loader-overlay" aria-hidden="true">
+      <div class="loader-spinner" role="status" aria-label="Загрузка"></div>
+    </div>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const menuItems = document.querySelectorAll('.menu_item1');
+    const menuToggle = document.getElementById('menu__toggle');
+
+    menuItems.forEach(function(menuItem) {
+        menuItem.addEventListener('click', function() {
+            menuToggle.checked = !menuToggle.checked;
+        });
+    });
+});
+</script>
+<script>
+function updateCartBadges(count){
+  document.querySelectorAll('.js-cart-badge').forEach(badge => {
+    badge.textContent = String(count);
+    badge.style.display = (Number(count) > 0) ? '' : 'none';
+  });
+}
+</script>
+<script>
+    document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.btn-add');
+  if (!btn) return;
+
+  const form = btn.closest('form.add-to-cart');
+  if (!form) return;
+  e.preventDefault();
+
+  const url  = form.dataset.url;
+  const qty  = (form.querySelector('input[name="qty"]')?.value || '1');
+  const csrf = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+  const oldTxt = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Добавляем…';
+
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrf,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: new URLSearchParams({ qty })
+    });
+
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || data.ok === false) {
+      throw new Error(data.error || 'Не удалось добавить товар');
+    }
+    if (typeof ym !== "undefined") {
+      ym(104545163, "reachGoal", "add_to_cart");
+    }
+    
+    updateCartBadges(Number(data.cart_count ?? 0));
+
+    
+    btn.textContent = 'Добавлено';
+    btn.style.background = '#28a745';
+    btn.classList.add('added');
+
+    
+    const q = Number((data.qty ?? qty) || 1);
+
+    
+    let label = btn.querySelector('.btn-label');
+    if (!label) {
+    
+    btn.textContent = '';
+    label = document.createElement('span');
+    label.className = 'btn-label';
+    btn.appendChild(label);
+
+    const qSpan = document.createElement('span');
+    qSpan.className = 'added-qty';
+    qSpan.style.whiteSpace = 'nowrap';
+    btn.appendChild(qSpan);
+    }
+
+    
+    label.textContent = 'Добавлено';
+    const qtyEl = btn.querySelector('.added-qty');
+    if (q > 1) {
+    qtyEl.textContent = ' × ' + q;
+    qtyEl.style.display = '';
+    } else {
+    qtyEl.textContent = '';
+    qtyEl.style.display = 'none';
+    }
+    
+
+  } catch (err) {
+    console.error('cart_add_ajax:', err);
+    btn.textContent = oldTxt;
+  } finally {
+    
+    btn.disabled = false;
+  }
+});
+
+</script>
+<script>
+    document.getElementById('open_mobile_menu').addEventListener('click', function() {
+        const label = document.querySelector('.menu__btn');
+        const event = new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+        });
+        label.dispatchEvent(event);
+    });
+</script>
+<script>
+// ---- csrf из cookie  ----
+function getCookie(name){
+  const m = document.cookie.match('(?:^|; )'+name.replace(/([.$?*|{}()[\]\\/+^])/g,'\\$1')+'=([^;]*)');
+  return m ? decodeURIComponent(m[1]) : '';
+}
+const CSRF = getCookie('csrftoken');
+
+// показать/скрыть нужную иконку
+function setFavUI(el, active){
+  el.dataset.state = active ? '1' : '0';
+  const on  = el.querySelector('.fav-on');
+  const off = el.querySelector('.fav-off');
+  if (on)  on.style.display  = active ? 'inline-block' : 'none';
+  if (off) off.style.display = active ? 'none' : 'inline-block';
+  el.setAttribute('aria-pressed', active ? 'true' : 'false');
+  el.title = active ? 'В избранном' : 'Добавить в избранное';
+}
+
+// инициализация всех сердечек на странице
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.fav-toggle').forEach(el => {
+    const initial = (el.dataset.initial || '0') === '1';
+    setFavUI(el, initial);
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.style.cursor = 'pointer';
+  });
+});
+
+// клик/энтер/пробел по сердечку => AJAX toggle
+async function toggleFav(el){
+  if (el.dataset.loading === '1') return;
+  el.dataset.loading = '1';
+  try{
+    const r = await fetch(el.dataset.url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': CSRF,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || data.ok === false) {
+      throw new Error(data.error || 'Ошибка добавления в избранное');
+    }
+    // ожидаем {ok:true, in_fav: bool}; если нет — просто инвертируем локально
+    const active = ('in_fav' in data) ? !!data.in_fav : el.dataset.state !== '1';
+    setFavUI(el, active);
+  }catch(err){
+    console.error('favorite_toggle:', err);
+  }finally{
+    el.dataset.loading = '0';
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('.fav-toggle');
+  if (!el) return;
+  e.preventDefault();
+  e.stopPropagation();
+  toggleFav(el);
+});
+
+document.addEventListener('keydown', (e) => {
+  const el = e.target.closest('.fav-toggle');
+  if (!el) return;
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleFav(el);
+  }
+});
+</script>
+<script>
+(function(){
+  var isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  document.querySelectorAll("select.js-catalog-selectify").forEach(function(sel){
+    if (isTouch) return; // на мобильных — нативный селект
+
+    // контейнер только для каталога
+    var wrap = document.createElement("div");
+    wrap.className = "catalog-selectify" + (sel.disabled ? " is-disabled" : "");
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.style.display = "none";
+ 
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "catalog-selectify__btn";
+    btn.setAttribute("aria-haspopup","listbox");
+    btn.setAttribute("aria-expanded","false");
+    wrap.appendChild(btn);
+
+    var list = document.createElement("div");
+    list.className = "catalog-selectify__list";
+    list.setAttribute("role","listbox");
+    wrap.appendChild(list);
+
+    function label(){
+      var cur = sel.options[sel.selectedIndex];
+      return cur ? cur.textContent.trim() : (sel.querySelector("option")?.textContent.trim() || "Каталог");
+    }
+    function renderBtn(){ btn.innerHTML = '<span>'+ label() +'</span>'; }
+
+    function renderList(){
+      list.innerHTML = "";
+      Array.from(sel.options).forEach(function(opt){
+        var item = document.createElement("div");
+        item.className = "catalog-selectify__opt";
+        item.setAttribute("role","option");
+        item.setAttribute("data-value", opt.value);
+        if (opt.selected) item.setAttribute("aria-selected","true");
+        item.textContent = opt.textContent;
+        item.addEventListener("click", function(){
+          if (sel.value !== opt.value) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event("change", {bubbles:true}));
+          }
+          close();
+        });
+        list.appendChild(item);
+      });
+    }
+
+    function open(){
+      wrap.classList.add("is-open");
+      btn.setAttribute("aria-expanded","true");
+      var host = sel.closest(".custom-select-wrapper");
+      if (host) host.classList.add("is-open");
+      document.addEventListener("click", onDoc, {capture:true, once:true});
+      document.addEventListener("keydown", onKey);
+    }
+    function close(){
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded","false");
+      var host = sel.closest(".custom-select-wrapper");
+      if (host) host.classList.remove("is-open");
+      document.removeEventListener("keydown", onKey);
+    }
+    function onDoc(e){
+      if (!wrap.contains(e.target)) close();
+      else document.addEventListener("click", onDoc, {capture:true, once:true});
+    }
+
+    function onKey(e){
+      var items = Array.from(list.querySelectorAll(".catalog-selectify__opt"));
+      var idx = items.findIndex(n => n.getAttribute("aria-selected")==="true");
+      if (idx < 0) idx = 0;
+
+      if (e.key === "ArrowDown"){ e.preventDefault(); idx = Math.min(idx+1, items.length-1); }
+      else if (e.key === "ArrowUp"){ e.preventDefault(); idx = Math.max(idx-1, 0); }
+      else if (e.key === "Enter"){ e.preventDefault(); items[idx]?.click(); return; }
+      else if (e.key === "Escape"){ e.preventDefault(); close(); btn.focus(); return; }
+      else return;
+
+      items.forEach(n => n.classList.remove("is-current"));
+      var cur = items[idx]; if (cur){ cur.classList.add("is-current"); cur.scrollIntoView({block:"nearest"}); }
+    }
+
+    btn.addEventListener("click", function(){
+      if (wrap.classList.contains("is-open")) close(); else open();
+    });
+
+    sel.addEventListener("change", function(){
+      var v = sel.value;
+      list.querySelectorAll(".catalog-selectify__opt").forEach(function(n){
+        n.toggleAttribute("aria-selected", n.getAttribute("data-value") === v);
+      });
+      renderBtn();
+    });
+
+    var mo = new MutationObserver(function(){
+      wrap.classList.toggle("is-disabled", sel.disabled);
+      btn.disabled = sel.disabled;
+    });
+    mo.observe(sel, {attributes:true, attributeFilter:["disabled"]});
+
+    renderBtn();
+    renderList();
+  });
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
+<script type="text/javascript">
+  (function(){
+    function Build(name, args){return function(){window.autodealerasync.push(name, arguments);} }
+    if (typeof autodealer === 'undefined') {
+      var s = document.createElement('script'); s.charset = "utf-8"; s.type = 'text/javascript'; s.src = 'https://online.autodealer.ru/widget/app.js';
+      var x = document.getElementsByTagName('head')[0]; x.appendChild(s); window.autodealer = {}; window.autodealerasync = []; autodealer.settings = {};
+      var m = ['init', 'open'];
+      for (var i = 0; i < m.length; i++) autodealer[m[i]] = Build(m[i]);
+    }
+  })();
+  autodealer.init('ad5806da2e7e84886727e062d269c9cd90eb7a93fa3b864de5b97f37ce5eebef');
+</script>
+<script>
+(function () {
+  const AD_POLL_MS = 120;
+
+  function waitFor(checkFn, timeoutMs = 8000) {
+    return new Promise((resolve, reject) => {
+      const t0 = Date.now();
+      const tick = () => {
+        try {
+          const v = checkFn();
+          if (v) return resolve(v);
+        } catch (e) {}
+        if (Date.now() - t0 > timeoutMs) return reject(new Error('timeout'));
+        setTimeout(tick, AD_POLL_MS);
+      };
+      tick();
+    });
+  }
+
+  async function ensureAutodealerReady() {
+    await waitFor(() => (window.autodealer && typeof autodealer.open === 'function' ? autodealer : null));
+    return window.autodealer;
+  }
+
+  function setVal(form, sel, val) {
+    if (!val) return;
+    const el = form.querySelector(sel);
+    if (!el) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  async function forwardToAutodealer(payload) {
+    try {
+      const ad = await ensureAutodealerReady();
+      ad.open(); 
+      const form = await waitFor(() => document.querySelector('.autodealer-widget-form'));
+
+      
+      setVal(form, 'input[name="markModel"]', payload.markModel || '');
+      setVal(form, 'textarea[name="reason"]',  payload.reason   || '');
+      setVal(form, 'input[name="contragent"]', payload.name     || '');
+      setVal(form, 'input[name="contact"]',    payload.phone    || '');
+
+      if (payload.date) setVal(form, 'input[name="date"]', payload.date);
+
+      
+      const agree = form.querySelector('input[name="agree"]');
+      if (agree) {
+        agree.checked = true;
+        agree.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      try { if (typeof ad.submit === 'function') ad.submit(); } catch (e) {}
+    } catch (e) {
+      console.warn('Autodealer bridge error:', e);
+    }
+  }
+
+  // вешаемся на наши формы с атрибутом data-autodealer="service|dyno|chip|contact"
+  document.addEventListener('submit', function (e) {
+    const form = e.target.closest('form[data-autodealer]');
+    if (!form) return;
+
+  
+    const payload = {
+      name:      (form.querySelector('[name="name"]')?.value || '').trim(),
+      phone:     (form.querySelector('[name="phone"]')?.value || '').trim(),
+      reason:    (form.querySelector('[name="comment"], textarea[name="reason"]')?.value || '').trim(),
+      date:      (form.querySelector('input[name="date"]')?.value || '').trim(),
+      markModel: (form.dataset.adMarkModel || '').trim()
+    };
+
+    const type = (form.dataset.autodealer || '').toLowerCase();
+   
+    if (!payload.reason && form.dataset.adReason) {
+      payload.reason = form.dataset.adReason.trim();
+    }
+   
+    if (!payload.reason && type === 'chip') {
+      payload.reason = 'Чип-тюнинг' + (payload.markModel ? ` — ${payload.markModel}` : '');
+    }
+
+    if (!payload.markModel) {
+      const make  = form.querySelector('[name="make"]')?.value || '';
+      const model = form.querySelector('[name="model"]')?.value || '';
+      payload.markModel = `${make} ${model}`.trim();
+    }
+
+    forwardToAutodealer(payload);
+  });
+
+  window.forwardToAutodealer = forwardToAutodealer;
+})();
+</script>
+<script>
+(function () {
+  function shouldSkipLink(link) {
+    const href = link.getAttribute('href') || '';
+
+    // явный флаг "не показывать лоадер"
+    if (link.hasAttribute('data-no-loader') || link.closest('[data-no-loader]')) return true;
+
+    // ссылки, которые открывают модалки / галереи / JS-виджеты
+    if (link.dataset.bsToggle) return true;        
+    if (link.hasAttribute('data-fancybox')) return true;
+
+   
+    if (!href || href.startsWith('#') || href.startsWith('javascript:')) return true;
+    if (/^(tel:|mailto:|sms:)/i.test(href)) return true;
+    if (link.target === '_blank') return true;
+
+    return false;
+  }
+
+  // ЛОАДЕР ТОЛЬКО ДЛЯ НАСТОЯЩИХ ПЕРЕХОДОВ ПО ССЫЛКЕ
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    if (e.defaultPrevented) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (shouldSkipLink(link)) return;
+
+    document.body.classList.add('is-loading');
+  }, false);
+
+  // ЛОАДЕР ТОЛЬКО ДЛЯ ОФФЛАЙН-САБМИТА ФОРМЫ
+  document.addEventListener('submit', function (e) {
+    const form = e.target;
+
+    if (e.defaultPrevented) return;
+    if (form.matches('[data-no-loader], [data-ajax], [data-autodealer]')) return;
+    document.body.classList.add('is-loading');
+  }, true);
+
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      document.body.classList.remove('is-loading');
+    }
+  });
+  
+  window.addEventListener('unload', function () {
+    document.body.classList.remove('is-loading');
+  });
+})();
+</script>
+
+
+<script>
+  (function () {
+    document.addEventListener('click', function (e) {
+      const opt = e.target.closest('.catalog-selectify__opt');
+      if (!opt) return;
+
+      const url = opt.getAttribute('data-value');
+      if (url) {
+        const wrap = opt.closest('.catalog-selectify');
+        const realSelect = wrap && wrap.querySelector('select.js-catalog-selectify');
+        if (realSelect) {
+          const match = realSelect.querySelector('option[value="' + url.replace(/"/g,'\\"') + '"]');
+          if (match) match.selected = true;
+        }
+
+        window.location.assign(url);
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const opt = e.target.closest('.catalog-selectify__opt');
+      if (!opt) return;
+      e.preventDefault();
+      const url = opt.getAttribute('data-value');
+      if (url) window.location.assign(url);
+    });
+  })();
+</script>
+</body>
+</html>

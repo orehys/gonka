@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .page_404 h2{
+        margin-top: 12px;
+        margin-bottom: 0;
+        font-family: Roboto;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 40px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0px;
+        text-align: center;
+        color: #4A4A4A;
+    }
+    .page_404 h3{
+        margin-top: 4px;
+        margin-bottom: 0;
+        font-family: Roboto;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 16px;
+        leading-trim: NONE;
+        line-height: 100%;
+        letter-spacing: 0%;
+        text-align: center;
+        font-variant-numeric-figure: lining-nums;
+        font-variant-numeric-spacing: proportional-nums;
+        color: #949494;
+    }
+    .page_404 button{
+        margin-top: 24px;
+        width: 125px;
+        height: 42px;
+        border-radius: 12px;
+        background: #4339DA;
+        border: none;
+        font-family: Roboto;
+        font-weight: 400;
+        font-style: Regular;
+        font-size: 14px;
+        leading-trim: NONE;
+        line-height: 18px;
+        letter-spacing: 0px;
+        font-variant-numeric-figure: lining-nums;
+        font-variant-numeric-spacing: proportional-nums;
+        color: white;
+    }
+</style>
+<div class="container page_404 pb-5">
+    <div class="row">
+        <div class="col-12 center">
+            <img src="{% static 'img/404.png' %}" alt="" class="w-100">
+            <h2>Такой страницы в нашем каталоге нет, но детали у нас всегда в наличии!</h2>
+            <h3>Возможно, вы ввели неверный адрес или страница была удалена. Попробуйте начать с главной или воспользуйтесь каталогом.</h3>
+            <button>На главную</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

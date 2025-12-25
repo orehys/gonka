@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h3 class="mb-2">Вход</h3>
+  <p>Пожалуйста, войдите, чтобы продолжить.</p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var modalEl = document.getElementById('loginModal');
+  // проставим hidden next в форме модалки тем, что пришло из GET
+  var nextInput = modalEl?.querySelector('form input[name="next"]');
+  if (nextInput) nextInput.value = "{{ next|escapejs }}";
+  // покажем модалку
+  if (modalEl && window.bootstrap) {
+    new bootstrap.Modal(modalEl).show();
+  }
+});
+</script>
+{% endblock %}

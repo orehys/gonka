@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% load money static %}
+{% block title %}{{ product.title }}{% endblock %}
+{% block content %}
+<style>
+  .data_order_cart select:focus-visible{
+    border: none;
+    outline: 2px solid var(--Greyscale-Lightgrey, #E8E8EA);
+  }
+</style>
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> /
+                    <a href="{% url 'catalog:product_list' %}">Каталог</a> / Корзина
+                </div>
+            </div>
+           
+            <div class="col-xl-12">
+            <div class="user_like_page mt-0">
+                <div class="row">
+                    <div class="col-xl-8">
+                        {% if rows %}
+                        {% for r in rows %}
+                        <div class="one_like">
+                            {% with img=r.product.images.all.0 %}
+                                {% if img %}<img src="{{ img.image.url }}" alt="" class="one_like_img">{% else %}
+                              <img src="{% static 'img/placeholder.png' %}" loading="lazy">{% endif %}
+                            {% endwith %}
+                            <div>
+                                <a href="{% url 'catalog:product_detail' r.product.slug %}"><h2 class="d-md-block d-none">{{ r.product.title }}</h2></a>
+                                <div class="one_like_art_nal">
+                                    <h3>{{ r.product.sku }}</h3>
+                                </div>
+                                <div class="one_like_art_nal">
+                                    {% if r.product.in_stock %}
+                                    <h4 style="margin-left: 0;">Есть в наличии</h4>
+                                    <img src="{% static 'img/Check.svg' %}" alt="">
+                                    {% else %}
+                                    <h4>Под заказ</h4>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="right md_left" style="min-width: 100px;">
+                                <a href="{% url 'catalog:product_detail' r.product.slug %}"><h2 class="d-md-none d-block">{{ r.product.title }}</h2></a>
+                                <div class="main_price_one_like">
+                                    {{ r.price|money }}
+                                </div>
+                                <p>{{ r.price|old_price|money }}</p>
+                                <div class="cart_dop_info" data-pid="{{ r.product.id }}">
+                                <img src="{% static 'img/minus.svg' %}" alt="" class="qty-minus">
+                                <div class="cart_dop_info_kol" data-qty>{{ r.qty }}</div>
+                                <img src="{% static 'img/plus.svg' %}" alt="" class="qty-plus">
+
+                                {# скрытая форма "установить количество" #}
+                                <form class="qty-form" action="{% url 'catalog:cart_set' r.product.id %}" method="post" style="display:none">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="qty" value="{{ r.qty }}">
+                                </form>
+
+                                {# удалить #}
+                                <form action="{% url 'catalog:cart_remove' r.product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button style="width:max-content;background:transparent;margin-left:0;padding:0">
+                                    <img src="{% static 'img/Delete.svg' %}" alt="">
+                                    </button>
+                                </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p>Корзина пуста.</p>
+                        {% endif %}
+                        <form id="orderForm" action="{% url 'catalog:checkout' %}" method="post">
+                        {% csrf_token %}
+
+                        <div class="data_order_cart">
+    <h3>Адрес и способ доставки</h3>
+
+    <h4>Способ доставки <span>*</span></h4>
+    <div class="one_seletc_order_cart">
+        <select name="delivery" id="delivery-select" required>
+            <option value="courier" {% if initial.delivery == 'courier' %}selected{% endif %}>Курьер</option>
+            <option value="pickup" {% if initial.delivery == 'pickup' %}selected{% endif %}>Самовывоз</option>
+        </select>
+    </div>
+
+    <h4>Адрес доставки <span>*</span></h4>
+    <input type="text" name="address" id="address-field" placeholder="г. Москва, Красная площадь"
+           value="{{ initial.address|default_if_none:'' }}" required>
+
+    <h4>Город</h4>
+    <input type="text" name="city" id="city-field" placeholder="Москва"
+           value="{{ initial.city|default_if_none:'' }}">
+</div>
+
+
+                        <div class="data_order_cart">
+                            <h3>Получатель</h3>
+
+                            <h4>ФИО <span>*</span></h4>
+                            <input type="text" name="name" placeholder="Иванов Иван Иванович"
+                                value="{{ initial.name|default_if_none:'' }}" required>
+
+                            <h4>E-mail</h4>
+                            <input type="email" name="email" placeholder="email@example.com"
+                                value="{{ initial.email|default_if_none:'' }}">
+
+                            <h4>Телефон <span>*</span></h4>
+                            <input type="text" name="phone" placeholder="+7 800 555-35-35"
+                                value="{{ initial.phone|default:'+7 ' }}" required>
+                        </div>
+
+                        <div class="data_order_cart">
+                            <h3>Способ оплаты</h3>
+
+                            <h4>Способ оплаты <span>*</span></h4>
+                            <div class="one_seletc_order_cart">
+                                <select name="payment" id="payment-select" required>
+                                    <option value="card" {% if initial.payment == 'card' %}selected{% endif %}>Карта</option>
+                                    <option value="cash" {% if initial.payment == 'cash' %}selected{% endif %}>Наличные</option>
+                                </select>
+                            </div>
+
+                            <div class="one_promo_cart">
+                            <input type="text" name="comment" placeholder="Комментарий / промокод"
+                                    value="{{ initial.comment|default_if_none:'' }}">
+                            </div>
+                            <div class="pd-consent-wrap">
+                              <label class="pd-consent">
+                                <input type="checkbox" class="pd-consent__cb" name="pd_consent" required style="width: auto; height: auto; margin-top: 0;">
+                                <span>
+                                  Я согласен(на) на обработку персональных данных
+                                  <a href="/catalog/soglasie/" target="_blank" rel="noopener">— подробные условия</a>
+                                </span>
+                              </label>
+                              <div class="pd-consent__error" aria-live="polite"></div>
+                            </div>
+                        </div>
+                        </form>
+
+
+                        
+                    </div>
+                    <div class="col-xl-4 mt-xl-0 mt-3">
+                        <div class="cart_order_sum">
+                            <div class="characteristics characteristics_cart">
+                            <h2 class="mt-0" style="margin-bottom: 24px;">Сумма заказа</h2>
+
+                            <div class="item">
+                                <span class="label">Стоимость продуктов</span>
+                                <div class="dots-container"><span class="dots"></span></div>
+                                <span class="value">{{ sum_gross|money }}</span>
+                            </div>
+
+                            <div class="item">
+                                <span class="label" style="color:#4339DA;">Скидка</span>
+                                <div class="dots-container"><span class="dots"></span></div>
+                                <span class="value" style="color:#4339DA;">-{{ sum_discount|money }}</span>
+                            </div>
+                            </div>
+
+                            <div class="cart_dop_info_order">
+                            <div class="cart_dop_info_order_total">
+                                <h5>Итого</h5>
+                                <h5>{{ sum_net|money }}</h5>
+                            </div>
+                            <button type="submit" form="orderForm" id="checkout-submit">Оформить заказ</button>
+                            <script>
+                              document.getElementById('checkout-submit')?.addEventListener('click', () => {
+                                try { if (typeof ym !== 'undefined') ym(104545163, 'reachGoal', 'checkout_click'); } catch(e){}
+                              });
+                            </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        
+                    </div>
+                </div>
+            </div>
+            <section class="last_collection mt-3">
+  <div class="">
+    <div class="last_collection_con">
+      <div class="col-12">
+        <div class="h2_cart_bottom">Ранее вы смотрели</div>
+      </div>
+
+      <div class="row">
+        {% for p in recent_products %}
+          <div class="col-md-4 col-6 {% if forloop.counter == 3 %}d-md-block d-none{% endif %}">
+            <div class="last_collection_con_cart">
+              {# Фото #}
+              {% with img=p.images.all.0 %}
+                {% if img %}
+                  <a class="text-decoration-none" href="{% url 'catalog:product_detail' p.slug %}">
+                    <img src="{{ img.image.url }}" alt="{{ p.title }}">
+                  </a>
+                {% else %}
+                  <a class="text-decoration-none" href="{% url 'catalog:product_detail' p.slug %}">
+                    <img src="{% static 'img/placeholder.png' %}" alt="{{ p.title }}">
+                  </a>
+                {% endif %}
+              {% endwith %}
+
+              {# Текст #}
+              <a class="text-decoration-none" href="{% url 'catalog:product_detail' p.slug %}">
+                <h2>{{ p.title }}</h2>
+              </a>
+              <h3>{{ p.sku }}</h3>
+              {% if p.in_stock %}
+              <h4 style="color: #5FC35D; font-weight: 400;">Есть в наличии</h4>
+              {% else %}
+              <h4>Под заказ</h4>
+              {% endif %}
+
+              {# Цена #}
+              <div class="last_collection_price">
+                <h5>{{ p.price|money }}</h5>
+                <h6>{{ p.price|old_price|money }}</h6>
+              </div>
+
+              {# Кнопка корзины #}
+              {% if cart_ids and p.id in cart_ids %}
+                
+              {% else %}
+                <form action="{% url 'catalog:cart_add' p.id %}" method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="qty" value="1">
+                  <button type="submit">В корзину</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <p class="text-muted">Пока пусто.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+        </div>
+    </div>
+
+
+</div>
+<script>
+document.addEventListener('click', (e) => {
+  const minus = e.target.closest('.qty-minus');
+  const plus  = e.target.closest('.qty-plus');
+  if (!minus && !plus) return;
+
+  const box   = (minus || plus).closest('.cart_dop_info');
+  const qtyEl = box.querySelector('[data-qty]');
+  const form  = box.querySelector('.qty-form');
+  const input = form.querySelector('input[name="qty"]');
+
+  let qty = parseInt(input.value || qtyEl.textContent || '1', 10) || 1;
+  qty += plus ? 1 : -1;
+  if (qty < 1) qty = 1;
+
+  qtyEl.textContent = qty;
+  input.value = qty;
+  form.submit();   // обычный POST, страница перерисуется с новыми суммами
+});
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const deliverySelect = document.getElementById('delivery-select');
+    const paymentSelect = document.getElementById('payment-select');
+    const addressField = document.getElementById('address-field');
+    const cityField = document.getElementById('city-field');
+
+    // Если элементы не найдены — выходим
+    if (!deliverySelect || !paymentSelect || !addressField || !cityField) {
+        console.warn('Один или несколько элементов формы не найдены.');
+        return;
+    }
+
+    // Сохраняем оригинальные значения полей
+    let originalAddress = addressField.value;
+    let originalCity = cityField.value;
+    let originalPayment = paymentSelect.value; // Сохраняем изначальный способ оплаты
+
+    function toggleDeliveryFields() {
+        if (deliverySelect.value === 'pickup') {
+            // Сохраняем текущие значения перед скрытием
+            originalAddress = addressField.value;
+            originalCity = cityField.value;
+
+            // Устанавливаем "Самовывоз" и скрываем
+            addressField.value = 'Самовывоз';
+            cityField.value = 'Самовывоз';
+
+            // Скрываем h4 и input
+            addressField.previousElementSibling.style.display = 'none';
+            addressField.style.display = 'none';
+            cityField.previousElementSibling.style.display = 'none';
+            cityField.style.display = 'none';
+
+            // Убираем required
+            addressField.removeAttribute('required');
+
+            // Разрешаем оба способа оплаты
+            enablePaymentOption('cash');
+            // Не меняем текущий выбор оплаты — пусть остаётся, если был
+
+        } else { // courier
+            // Восстанавливаем значения и показываем поля
+            addressField.value = originalAddress;
+            cityField.value = originalCity;
+
+            addressField.previousElementSibling.style.display = 'block';
+            addressField.style.display = 'block';
+            cityField.previousElementSibling.style.display = 'block';
+            cityField.style.display = 'block';
+
+            // Возвращаем required
+            addressField.setAttribute('required', 'required');
+
+            // Блокируем "Наличные" и переключаем на "Карту", если нужно
+            disablePaymentOption('cash');
+            if (paymentSelect.value === 'cash') {
+                paymentSelect.value = 'card';
+            }
+        }
+    }
+
+    // Вспомогательные функции для управления опциями оплаты
+    function disablePaymentOption(value) {
+        const option = paymentSelect.querySelector(`option[value="${value}"]`);
+        if (option) option.disabled = true;
+    }
+
+    function enablePaymentOption(value) {
+        const option = paymentSelect.querySelector(`option[value="${value}"]`);
+        if (option) option.disabled = false;
+    }
+
+    // Инициализация при загрузке страницы
+    toggleDeliveryFields();
+
+    // Обработчик изменения выбора доставки
+    deliverySelect.addEventListener('change', toggleDeliveryFields);
+});
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  document.addEventListener('click', function(e){
+    const minus = e.target.closest('.qty-minus');
+    const plus  = e.target.closest('.qty-plus');
+    if (!minus && !plus) return;
+
+    const box   = (minus || plus).closest('.cart_dop_info');
+    const pid   = box?.getAttribute('data-pid');
+    const item  = box?.closest('.one_like');
+
+    const name  = item?.querySelector('h2')?.textContent?.trim() || '';
+    const sku   = item?.querySelector('.one_like_art_nal h3')?.textContent?.trim() || '';
+    const price = item?.querySelector('.main_price_one_like')?.textContent?.replace(/[^\d.,]/g,'').replace(',', '.') || '';
+
+    const payload = {
+      ecommerce: {
+        currencyCode: "RUB"
+      }
+    };
+    const prod = {
+      id: sku,
+      name: name,
+      price: parseFloat(price) || undefined,
+      category: "",
+      quantity: 1
+    };
+
+    if (plus){
+      payload.ecommerce.add = { products: [prod] };
+    } else {
+      payload.ecommerce.remove = { products: [prod] };
+    }
+    window.dataLayer.push(payload);
+  }, {capture:true});
+
+
+  document.addEventListener('submit', function(e){
+    const form = e.target;
+
+    if (form.action.includes('/cart_remove/')) {
+      const item  = form.closest('.one_like');
+      const name  = item?.querySelector('h2')?.textContent?.trim() || '';
+      const sku   = item?.querySelector('.one_like_art_nal h3')?.textContent?.trim() || '';
+      const qtyEl = item?.querySelector('[data-qty]');
+      const qty   = parseInt(qtyEl?.textContent || '1', 10) || 1;
+
+      window.dataLayer.push({
+        ecommerce: {
+          currencyCode: "RUB",
+          remove: { products: [{ id: sku, name: name, quantity: qty }] }
+        }
+      });
+    }
+  }, true);
+
+  (function(){
+    const btn = document.getElementById('checkout-submit');
+    if(!btn) return;
+
+    btn.addEventListener('click', function(){
+      const products = [];
+      document.querySelectorAll('.one_like').forEach(function(row, idx){
+        const name  = row.querySelector('h2')?.textContent?.trim() || '';
+        const sku   = row.querySelector('.one_like_art_nal h3')?.textContent?.trim() || '';
+        const qty   = parseInt(row.querySelector('[data-qty]')?.textContent || '1', 10) || 1;
+        const price = row.querySelector('.main_price_one_like')?.textContent?.replace(/[^\d.,]/g,'').replace(',', '.') || '';
+        products.push({
+          id: sku,
+          name: name,
+          price: parseFloat(price) || undefined,
+          quantity: qty,
+          position: idx+1,
+          list: "Cart"
+        });
+      });
+
+      window.dataLayer.push({
+        ecommerce: {
+          currencyCode: "RUB",
+          checkout: { actionField: { step: 1 }, products }
+        }
+      });
+    });
+  })();
+</script>
+
+{% endblock %}

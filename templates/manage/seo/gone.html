@@ -1,0 +1,35 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<h4>410 Gone</h4>
+
+<form class="row g-2 mb-3" method="post">{% csrf_token %}
+  <div class="col-md-8">{{ form.path_or_regex.label_tag }} {{ form.path_or_regex }}</div>
+  <div class="col-md-4">{{ form.comment.label_tag }} {{ form.comment }}</div>
+  <div class="col-12"><button class="btn btn-primary btn-sm">Добавить</button></div>
+</form>
+
+<form class="my-2" method="get">
+  <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск по пути/комменту">
+</form>
+
+<table class="table table-sm align-middle">
+  <thead><tr><th>ID</th><th>Path/Regex</th><th>Комментарий</th><th></th></tr></thead>
+  <tbody>
+    {% for g in page_obj.object_list %}
+    <tr>
+      <td>{{ g.id }}</td>
+      <td><code>{{ g.path_or_regex }}</code></td>
+      <td>{{ g.comment }}</td>
+      <td class="text-end">
+        <form method="post" action="{% url 'catalog:m_gone_delete' g.id %}">{% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?')">Удалить</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="text-muted">Пока пусто</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

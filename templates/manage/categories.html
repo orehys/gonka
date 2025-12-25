@@ -1,0 +1,126 @@
+{% extends "manage/base_admin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Категории</h4>
+    
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <form action="{% url 'catalog:m_category_add' %}" method="post" class="row g-2 align-items-center mb-4">
+    {% csrf_token %}
+    <div class="col-md-6">
+      <input type="text" name="name" class="form-control" placeholder="Новая родительская категория">
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-success">Добавить категорию</button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th style="width:38%">Родительская категория</th>
+          <th style="width:18%"></th>
+          <th>Подкатегории</th>
+          <th style="width:12%"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in top_cats %}
+        <tr id="cat-{{ c.id }}">
+          <td>
+            {# Родительская строка #}
+            {# для родительской категории #}
+            <form action="{% url 'catalog:m_category_rename' c.id %}" method="post" class="d-flex gap-2 align-items-center">
+              {% csrf_token %}
+              <input type="text" name="name" value="{{ c.name }}" class="form-control" placeholder="Название" />
+              <input type="text" name="slug" value="{{ c.slug }}" class="form-control" style="max-width: 240px" placeholder="slug">
+              <button class="btn btn-sm btn-primary">Сохранить</button>
+            </form>
+
+            <form action="{% url 'catalog:m_category_toggle_hidden' c.id %}" method="post" class="d-inline-block mt-2">
+              {% csrf_token %}
+              <label class="form-check-label me-2">
+                <input type="checkbox" class="form-check-input" name="is_hidden" value="1" {% if c.is_hidden %}checked{% endif %}>
+                Скрыта
+              </label>
+              <button class="btn btn-sm btn-outline-secondary">Применить</button>
+            </form>
+
+
+            <form action="{% url 'catalog:m_category_add_child' c.id %}" method="post" class="d-flex gap-2 mt-2">
+              {% csrf_token %}
+              <input type="text" name="name" class="form-control" placeholder="Новая подкатегория">
+              <button class="btn btn-sm btn-outline-success">Добавить</button>
+            </form>
+          </td>
+
+          <td class="text-muted">
+            <code>{{ c.slug }}</code>
+          </td>
+
+          <td>
+            {% if c.children.all %}
+              <ul class="list-unstyled mb-0">
+                {% for ch in c.children.all %}
+                <li class="mb-2 d-flex align-items-center">
+                  <form action="{% url 'catalog:m_category_rename' ch.id %}" method="post" class="d-flex gap-2 align-items-center flex-grow-1">
+                    {% csrf_token %}
+                    <input type="text" name="name" value="{{ ch.name }}" class="form-control" placeholder="Название" />
+                    <input type="text" name="slug" value="{{ ch.slug }}" class="form-control" style="max-width: 240px" placeholder="slug">
+                    <button class="btn btn-sm btn-outline-primary">Сохранить</button>
+                  </form>
+
+                  <form action="{% url 'catalog:m_category_toggle_hidden' ch.id %}" method="post" class="ms-2">
+                    {% csrf_token %}
+                    <label class="form-check-label me-2">
+                      <input type="checkbox" class="form-check-input" name="is_hidden" value="1" {% if ch.is_hidden %}checked{% endif %}>
+                      Скрыта
+                    </label>
+                    <button class="btn btn-sm btn-outline-secondary">Применить</button>
+                  </form>
+
+                  <form action="{% url 'catalog:m_category_delete' ch.id %}" method="post" class="ms-2">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Удалить подкатегорию «{{ ch.name }}»? Это действие необратимо.');">
+                      Удалить
+                    </button>
+                  </form>
+                </li>
+                {% empty %}
+                <li class="text-muted">— нет подкатегорий —</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+
+          <td class="text-end">
+            <form action="{% url 'catalog:m_category_delete' c.id %}" method="post">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger"
+                      onclick="return confirm('Удалить категорию «{{ c.name }}»? Можно удалить только пустую категорию.');">
+                Удалить
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-muted">Категории пока не созданы</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

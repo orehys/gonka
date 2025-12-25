@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / Диностенд
+                </div>
+            </div>
+            <div class="col-lg-3 d-lg-block d-none">
+
+            </div>
+            <style>
+                        .main .owl-carousel { position: relative; }
+                        .main .owl-dots {
+                        position: absolute;
+                        left: 0; right: 0; bottom: 16px;
+                        display: flex; justify-content: center; gap: 8px;
+                        }
+                        .main .owl-dot span {
+                        width: 10px; height: 10px; border-radius: 50%;
+                        background: #fff; opacity: .5; display: block;
+                        }
+                        .main .owl-dot.active span { opacity: 1; }
+
+                        .main-hero-img {
+                        display: block;
+                        width: 100%;
+                        }
+                        .owl-theme .owl-dots .owl-dot span{
+                            background: white;
+                        }
+
+                    </style>
+            <div class="col-lg-9">
+
+                <div class="deliv_and_pay" style="margin-top: 48px;">
+                    {% if page %}{{ page.content_html|safe }}{% endif %}    
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

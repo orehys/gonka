@@ -1,0 +1,16 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<h4>robots.txt</h4>
+<form method="post">{% csrf_token %}
+  <div class="form-check mb-2">
+    {{ form.is_active }} <label class="form-check-label">Активировать robots.txt из БД</label>
+  </div>
+  {{ form.content }}
+  <div class="mt-3">
+    <button class="btn btn-primary">Сохранить</button>
+  </div>
+</form>
+<div class="form-text mt-2">
+  Файл доступен по <a href="/robots.txt" target="_blank">/robots.txt</a>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <h4 class="mb-0">Новая рассылка</h4>
+      <div class="text-muted">Письмо по шаблону акции</div>
+    </div>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'catalog:m_users' %}">← К пользователям</a>
+  </div>
+
+  <form method="post" class="mt-2">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Тема</label>
+      <input type="text" name="subject" class="form-control" value="{{ form.subject.value|default_if_none:'' }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Заголовок акции</label>
+      <input type="text" name="title" class="form-control" value="{{ form.title.value|default_if_none:'' }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Описание</label>
+      <textarea name="description" class="form-control" rows="4" required>{{ form.description.value|default_if_none:'' }}</textarea>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Ссылка кнопки</label>
+        <input type="url" name="button_url" class="form-control" value="{{ form.button_url.value|default_if_none:'' }}" placeholder="https://..." required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Текст кнопки</label>
+        <input type="text" name="button_text" class="form-control" value="{{ form.button_text.value|default_if_none:'Открыть акцию' }}">
+      </div>
+    </div>
+
+    <div class="mb-3 mt-3 d-none">
+      <label class="form-label">Картинка hero (static path)</label>
+      <div class="input-group">
+        <span class="input-group-text">static/</span>
+        <input type="text" name="hero_path" class="form-control" value="{{ form.hero_path.value|default_if_none:'img/mail_hero.png' }}">
+      </div>
+      <div class="form-text">Файл должен лежать в static/, напр. <code>img/mail_hero.png</code> (исп. абсолютную ссылку по HTTPS).</div>
+    </div>
+
+    <div class="row g-3 mt-2">
+      <div class="col-md-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="only_active" id="onlyActive" {% if form.only_active.value or form.only_active.value is None %}checked{% endif %}>
+          <label class="form-check-label" for="onlyActive">Только активные пользователи</label>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Тестовая отправка</label>
+        <div class="input-group">
+          <input type="email" name="test_email" class="form-control" placeholder="you@example.com" value="{{ form.test_email.value|default_if_none:'' }}">
+          <button class="btn btn-outline-primary" type="submit">Отправить тест</button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary">Разослать всем</button>
+      <a class="btn btn-outline-secondary" href="{% url 'catalog:m_users' %}">Отмена</a>
+    </div>
+  </form>
+
+  {% if result %}
+    <hr class="my-4">
+    <div class="alert {% if result.failed_list and result.failed_list|length > 0 %}alert-warning{% else %}alert-success{% endif %}">
+      <div><strong>Итог:</strong> отправлено {{ result.sent }} из {{ result.total }}.</div>
+      {% if result.failed_list and result.failed_list|length > 0 %}
+        <div class="mt-2">Не удалось отправить на {{ result.failed_list|length }} адрес(ов):</div>
+        <div class="p-2 border rounded bg-light" style="max-height:220px; overflow:auto;">
+          <ul class="mb-0">
+            {% for addr, reason in result.failed_list %}
+              <li><code>{{ addr }}</code> — <span class="text-muted">{{ reason }}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center">
+  <h4>SEO-записи</h4>
+  <a href="{% url 'catalog:m_seo_entry_new' %}" class="btn btn-sm btn-primary">+ Новая</a>
+</div>
+<form class="my-2" method="get">
+  <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск по title/h1/description/path_regex">
+</form>
+<table class="table table-sm align-middle">
+  <thead><tr>
+    <th>ID</th><th>Активна</th><th>Объект / path_regex</th><th>Title</th><th>H1</th><th></th>
+  </tr></thead>
+  <tbody>
+    {% for e in page_obj.object_list %}
+    <tr>
+      <td>{{ e.id }}</td>
+      <td>{% if e.is_active %}✅{% else %}—{% endif %}</td>
+      <td>
+        {% if e.content_type_id %}{{ e.content_type.app_label }}.{{ e.content_type.model }}#{{ e.object_id }}{% else %}<code>{{ e.path_regex }}</code>{% endif %}
+      </td>
+      <td>{{ e.title|default:"" }}</td>
+      <td>{{ e.h1|default:"" }}</td>
+      <td class="text-end">
+        <a class="btn btn-sm btn-outline-primary" href="{% url 'catalog:m_seo_entry_edit' e.id %}">Править</a>
+        <form class="d-inline" method="post" action="{% url 'catalog:m_seo_entry_delete' e.id %}">{% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Удалить?')">Удалить</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="text-muted">Пока пусто</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

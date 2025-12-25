@@ -1,0 +1,869 @@
+
+{% extends "base.html" %}
+{% load money %}{% load qs %} {% load static %} {% load dictx %}
+{% block title %}Каталог{% endblock %}
+{% block content %}
+
+<style>
+    .fav-toggle { display:inline-block; cursor:pointer; }
+.fav-toggle .fav-on { display:none; }
+.fav-toggle.fav-active .fav-on { display:inline; }
+.fav-toggle.fav-active .fav-off { display:none; }
+.ts-control{
+      border-radius: 12px;
+    background: var(--Greyscale-Veryightgrey, #F8F8F8);
+    color: var(--Greyscale-Moredeepblack, #1A1A1A);
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px;
+    padding: 4px 36px 4px 12px;
+    border: none;
+    cursor: pointer;
+    box-shadow: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+}
+.ts-wrapper{
+  display: inline-block;
+}
+.ts-control, .ts-wrapper.single.input-active .ts-control{
+  background: var(--Greyscale-Veryightgrey, #F8F8F8);
+}
+.ts-dropdown, .ts-control, .ts-control input{
+  color: var(--Greyscale-Moredeepblack, #1A1A1A);
+   font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 18px;
+}
+.full .ts-control{
+  background: var(--Greyscale-Veryightgrey, #F8F8F8);
+}
+.ts-control .item{
+  margin-bottom: 0;
+}
+
+/* ——— кастомное меню ——— */
+.selectify { position: relative; width:100%; }
+.selectify.is-disabled { opacity:.6; pointer-events:none; }
+
+/* кнопка-заменитель */
+.selectify__btn{
+  min-width: 136px;
+  width:100%;
+  padding-right: 42px;
+  text-align:left;
+  height: 26px;
+  border: none;
+  border-radius:12px;
+  background:#F8F8F8; color:#1A1A1A;
+  font:400 14px/18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  cursor:pointer;
+}
+.selectify__btn:focus{
+  outline:0;  background:#fff;
+}
+
+/* выпадающий список */
+.selectify__list{
+  position:absolute; z-index:50; left:0; right:0; top:calc(100% + 6px);
+  background:#fff; border:1px solid #E6E6E6; border-radius:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  max-height:280px; overflow:auto; padding:4px;
+  display:none;
+}
+.selectify.is-open .selectify__list{ display:block; }
+
+/* пункт */
+.selectify__opt{
+  margin-top: 5px;
+  padding:6px; border-radius:10px; cursor:pointer; user-select:none;font-size: 14px;
+  font-family: Roboto;
+    font-weight: 400;
+    font-style: Regular;
+    line-height: 18px;
+
+}
+.selectify__opt:hover{ background:#F4F4F4; }
+.selectify__opt[aria-selected="true"]{ background:#F4F4F4; }
+.selectify__opt.is-current{ outline:2px solid rgba(67, 57, 218, 1); }
+
+/* плейсхолдер */
+.selectify__placeholder{ color:#9B9B9B; }
+@media (max-width: 1400px) {
+    .one_select_catalog:last-child {
+        margin-top: 0px;
+    }
+}
+.filters_catalog_form_new{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.selectify__btn_clear{
+    min-width: 136px;
+  width: 100%;
+  text-align: center;
+  height: 26px;
+  border: none;
+  border-radius: 12px;
+  font: 400 14px / 18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+  background-color: #4339DA;
+  color: #fff;
+  margin-top: 8px;
+}
+@media(max-width: 1400px){
+  .selectify__btn_clear{
+    margin-left: 0px;
+  }
+}
+</style>
+<style>
+  :root{
+  --stock-accent: #4339DA;      
+  --stock-border: #BDBDBD;      
+  --stock-text:   #ACACAC;     
+  --stock-disabled:#C9C9C9;     
+}
+
+.stock-checkbox{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  user-select:none;
+  font-family: Montserrat, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;           
+  font-size:16px;
+  line-height:100%;
+}
+
+.stock-checkbox > input{
+  position:absolute;
+  inline-size:1px;
+  block-size:1px;
+  margin:-1px;
+  padding:0;
+  border:0;
+  clip:rect(0 0 0 0);
+  overflow:hidden;
+}
+
+.stock-checkbox__box{
+  width:24px;
+  height:24px;
+  border-radius:12px;
+  border:2px solid var(--stock-border);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  box-sizing:border-box;
+}
+
+.stock-checkbox__box::after{
+  content:"";
+  width:6px;
+  height:10px;
+  border:2px solid #fff;
+  border-top:0;
+  border-left:0;
+  transform:rotate(45deg) translateY(-1px);
+  opacity:0;
+  transition:opacity .12s ease;
+}
+
+.stock-checkbox__label{
+  color:var(--stock-text);
+  transition:color .15s ease;
+}
+
+.stock-checkbox > input:checked + .stock-checkbox__box{
+  background:var(--stock-accent);
+  border-color:var(--stock-accent);
+}
+.stock-checkbox > input:checked + .stock-checkbox__box::after{
+  opacity:1;
+}
+.stock-checkbox > input:checked ~ .stock-checkbox__label{
+  color:var(--stock-accent);
+}
+
+.stock-checkbox > input:focus-visible + .stock-checkbox__box{
+  box-shadow:0 0 0 3px rgba(67,57,218,.25);
+}
+
+.stock-checkbox > input:disabled + .stock-checkbox__box{
+  background:var(--stock-disabled);
+  border-color:var(--stock-disabled);
+}
+.stock-checkbox > input:disabled ~ .stock-checkbox__label{
+  color:var(--stock-disabled);
+  cursor:not-allowed;
+}
+.stock-checkbox:has(> input:disabled){
+  cursor:not-allowed;
+}
+@media (max-width: 576px) {
+    .last_collection_con_cart h4 {
+        display: block;
+        margin-bottom: 0;
+    }
+}
+
+
+</style>
+
+
+<!-- Модальное окно -->
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable"> <!-- Добавлен scrollable для прокрутки при необходимости -->
+    <div class="modal-content">
+      <!-- Заголовок -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="filterModalLabel">Фильтры каталога</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+
+      <!-- Тело модалки -->
+      <div class="modal-body">
+        <div class="filters_catalog">
+          <form action="" class="" method="get">
+            {# сохраняем уже выбранные cat/sub, чтобы не слетали при смене селектов #}
+            <input type="hidden" name="cat" value="{{ cat }}">
+            <input type="hidden" name="sub" value="{{ sub }}">
+            <input type="hidden" name="q"   value="{{ q }}">
+
+            <div class="one_select_catalog mb-3">
+              <select class="form-select" id="form-select1" name="order" onchange="this.form.submit()">
+                <option value="popular"   {% if order == "popular" %}selected{% endif %}>По популярности</option>
+                <option value="price_asc" {% if order == "price_asc" %}selected{% endif %}>Цена ↑</option>
+                <option value="price_desc"{% if order == "price_desc" %}selected{% endif %}>Цена ↓</option>
+                <option value="new"       {% if order == "new" %}selected{% endif %}>Новинки</option>
+              </select>
+            </div>
+
+            <div class="one_select_catalog mb-3">
+              <select class="form-select" name="brand" onchange="this.form.submit()">
+                <option value="">Производитель</option>
+                {% for v in brand_options %}
+                <option value="{{ v }}" {% if v == brand %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="one_select_catalog mb-3">
+              <select class="form-select" name="make" onchange="this.form.submit()">
+                <option value="">Марка авто</option>
+                {% for v in make_options %}
+                <option value="{{ v }}" {% if v == make %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="one_select_catalog mb-3">
+              <select class="form-select" name="model" onchange="this.form.submit()">
+                <option value="">Модель авто</option>
+                {% for v in model_options %}
+                <option value="{{ v }}" {% if v == model %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="one_select_catalog mb-3">
+              <select class="form-select" name="engine" onchange="this.form.submit()">
+                <option value="">Двигатель</option>
+                {% for v in engine_options %}
+                <option value="{{ v }}" {% if v == engine %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+          
+        </div>
+      </div>
+
+      <!-- Футер (опционально) -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                <a href="/">Главная</a>
+                /
+                <a href="{% url 'catalog:product_list' %}{% qs clear=True %}">Каталог</a>
+
+                {% if current_cat %}
+                    / <a href="{% qs cat=current_cat.slug sub='' page='' %}">{{ current_cat.name }}</a>
+                {% endif %}
+                {% if current_sub %}
+                    / <span>{{ current_sub.name }}</span>
+                {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3 d-md-block d-none">
+                <div class="choose_categories">
+                    <details>
+                        <summary>
+                            <a href="{% url 'catalog:product_list' %}{% qs clear=True %}">Весь каталог</a>
+                        </summary>
+                    </details>
+                    {% for catobj in top_cats %}
+                    <details {% if catobj.slug == cat %}open{% endif %}>
+                        <summary>
+                        <a href="{% qs cat=catobj.slug sub='' page='' %}">{{ catobj.name }}</a>
+                        </summary>
+
+                        {% for sub in catobj.children.all %}
+                        <p>
+                            <a href="{% qs cat=catobj.slug sub=sub.slug page='' %}">{{ sub.name }}</a>
+                        </p>
+                        {% empty %}
+                        <p class="text-muted">Пока пусто</p>
+                        {% endfor %}
+                    </details>
+                    {% endfor %}
+
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="filters_catalog d-flex align-items-start justify-content-start" style="flex-wrap: wrap;">
+                  
+                    <form action="" class="filters_catalog_form_new mb-0" method="get">
+                    {# сохраняем уже выбранные cat/sub, чтобы не слетали при смене селектов #}
+                    <input type="hidden" name="cat" value="{{ cat }}">
+                    <input type="hidden" name="sub" value="{{ sub }}">
+                    <input type="hidden" name="q"   value="{{ q }}">
+
+                    <div class="one_select_catalog d-md-none d-inline-block">
+                      <select class="form-select js-selectify"
+                              onchange="if(this.value){ window.location.href = this.value }">
+                        <option value="{% qs cat='' sub='' page='' %}"
+                                {% if not cat and not sub %}selected{% endif %}>
+                          Все категории
+                        </option>
+
+                        {% for catobj in top_cats %}
+                          <option value="{% qs cat=catobj.slug sub='' page='' %}"
+                                  {% if cat == catobj.slug and not sub %}selected{% endif %}>
+                            {{ catobj.name }}
+                          </option>
+
+                          {% for subobj in catobj.children.all %}
+                            <option value="{% qs cat=catobj.slug sub=subobj.slug page='' %}"
+                                    {% if cat == catobj.slug and sub == subobj.slug %}selected{% endif %}>
+                              — {{ subobj.name }}
+                            </option>
+                          {% endfor %}
+                        {% endfor %}
+                      </select>
+                    </div>
+
+
+                    <div class="one_select_catalog">
+                      <select class="form-select js-selectify" name="order" onchange="this.form.submit()">
+                        <option value="popular"    {% if order == "popular" or not order %}selected{% endif %}>По популярности</option>
+                        <option value="price_asc"  {% if order == "price_asc" %}selected{% endif %}>Цена ↑</option>
+                        <option value="price_desc" {% if order == "price_desc" %}selected{% endif %}>Цена ↓</option>
+                        <option value="new"        {% if order == "new" %}selected{% endif %}>Новинки</option>
+                      </select>
+                    </div>
+                    
+
+
+
+                    <select id="select-beast1" placeholder="Производитель" autocomplete="off" name="brand" onchange="this.form.submit()">
+                      <option value="">Производитель</option>
+                        {% for v in brand_options %}
+                        <option value="{{ v }}" {% if v == brand %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <select id="select-beast" placeholder="Марка авто" autocomplete="off" name="make" onchange="this.form.submit()">
+                    <option value="">Марка авто</option>
+                      {% for v in make_options %}
+                          <option value="{{ v }}" {% if v == make %}selected{% endif %}>{{ v }}</option>
+                          {% endfor %}
+                    </select>
+
+                    <select id="select-beast2" placeholder="Модель авто" autocomplete="off" name="model" onchange="this.form.submit()">
+                    <option value="">Модель авто</option>
+                      {% for v in model_options %}
+                        <option value="{{ v }}" {% if v == model %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="one_select_catalog">
+                      <select class="form-select js-selectify" name="engine" onchange="this.form.submit()">
+                        <option value="">Двигатель</option>
+                        {% for v in engine_options %}
+                        <option value="{{ v }}" {% if v == engine %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="">
+                      <label class="stock-checkbox">
+                        <input
+                          type="checkbox"
+                          name="stock"
+                          value="in"
+                          {% if stock == 'in' %}checked{% endif %}
+                          onchange="this.form.submit()"
+                        >
+                        <span class="stock-checkbox__box" aria-hidden="true"></span>
+                        <span class="stock-checkbox__label">В наличии</span>
+                      </label>
+                    </div>
+                    
+                    </form>
+
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#filterModal"><img src="{% static 'img/filter_icon.svg' %}" class="d-none" alt=""></a>
+                    <div>
+                        
+                    </div>
+                    <a href="{% url 'catalog:product_list' %}{% qs clear=True %}"><button class=" selectify__btn_clear">Очистить фильтр</button></a>
+                </div>
+                <p>Найдено товаров: {{ found_count }}</p>
+
+                <section class="last_collection mt-3">
+                    <div class="">
+                        <div class="last_collection_con">
+                            <div class="row">
+                                {% for product in page_obj %}
+                                <div class="col-xl-4 col-6">
+                                    <a class="text-decoration-none" href="{{ product.get_absolute_url }}">
+                                    <div class="last_collection_con_cart">
+                                        {% with img=product.images.all.0 %}
+                                            {% if img %}<img src="{{ img.image.url }}" alt="{{ product.title }}" >{% else %}
+                              <img src="{% static 'img/placeholder.png' %}" loading="lazy">{% endif %}
+                                        {% endwith %}
+                                        <h2>{{ product.title }}</h2>
+                                        <h3>{{ product.sku }}</h3>
+                                        {% if product.in_stock %}
+                                        <h4 style="color: #5FC35D; font-weight: 400;">Есть в наличии</h4>
+                                        {% else %}
+                                        <h4>Под заказ</h4>
+                                        {% endif %}
+                                        <div class="last_collection_price">
+                                            <h5>{{ product.price|money }}</h5>
+                                            <h6>{{ product.price|old_price|money }}</h6>
+                                        </div>
+                                        {% if product.id in cart_ids %}
+                                        <div>
+                                            <button class="d-inline-block" style="background: #28a745;">Добавлено                                             {% with qty=cart_qty|dict_get:product.id %}
+                                              <span class="added-qty"
+                                                    id="added-qty-{{ product.id }}"
+                                                    {% if q <= 1 %}style="display:none"{% endif %}>× {{ qty }}</span>
+                                            {% endwith %}</button><div class="fav-toggle d-inline-block" style="height: 0;"
+                                            data-product="{{ product.id }}"
+                                            data-url="{% url 'catalog:favorite_toggle' product.id %}"
+                                            data-initial="{% if product.id in fav_ids %}1{% else %}0{% endif %}">
+                                        <img class="fav-off"
+                                            src="{% static 'img/Heart_01_grey.svg' %}"
+                                            alt="Добавить в избранное"
+                                            style="width: 24px;height: 24px;margin-bottom: 0; margin-left: 4px; display:{% if is_faved %}none{% else %}inline-block{% endif %};">
+                                        <img class="fav-on"
+                                            src="{% static 'img/Heart_01.svg' %}"
+                                            alt="В избранном"
+                                            style="width: 24px;height: 24px;margin-bottom: 0;  margin-left: 4px; display:{% if is_faved %}inline-block{% else %}none{% endif %};">
+                                        </div>
+                                        </div>
+                                        
+                                        {% else %}
+                                        <div class="js-cart-zone">  {# зона, в которой нельзя кликнуть по stretched-link #}
+                                        <form class="add-to-cart" data-url="{% url 'catalog:cart_add_ajax' product.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="qty" value="1">
+                                        <button type="button" class="btn-add" style="position:relative;z-index:4;">В корзину</button>
+                                        <div class="fav-toggle" style="height:0"
+                                            data-product="{{ product.id }}"
+                                            data-url="{% url 'catalog:favorite_toggle' product.id %}"
+                                            data-initial="{% if product.id in fav_ids %}1{% else %}0{% endif %}">
+                                            <img class="fav-off"
+                                            src="{% static 'img/Heart_01_grey.svg' %}"
+                                            alt="Добавить в избранное"
+                                            style="width: 24px;height: 24px;margin-bottom: 0; margin-left: 4px; display:{% if is_faved %}none{% else %}inline-block{% endif %};">
+                                        <img class="fav-on"
+                                            src="{% static 'img/Heart_01.svg' %}"
+                                            alt="В избранном"
+                                            style="width: 24px;height: 24px;margin-bottom: 0;  margin-left: 4px; display:{% if is_faved %}inline-block{% else %}none{% endif %};">
+                                          </div>
+                                        </form>
+                                      </div>
+
+                                        {% endif %}
+                                    </div></a>
+                                </div>
+                                {% empty %}
+                                    <p>Ничего не найдено.</p>
+                                {% endfor %}
+                            </div>
+                            </div>
+                        </div>  
+                        {% for k, v in params.items %}
+                        <input type="hidden" name="{{ k }}" value="{{ v }}">
+                        {% endfor %}
+
+                        <div class="center">
+                            <form class="carservice_our_work_btn" style="margin-bottom: 64px;" method="get">
+                                {# сохраняем все текущие фильтры, кроме page #}
+                                {% for k, v in params.items %}
+                                <input type="hidden" name="{{ k }}" value="{{ v }}">
+                                {% endfor %}
+
+                                {# Предыдущая #}
+                                {% if page_obj.has_previous %}
+                                <button type="submit" name="page" value="{{ page_obj.previous_page_number }}">
+                                    <img src="{% static 'img/strel_sum.svg' %}"  alt=""><span>Предыдущая страница</span>
+                                </button>
+                                {% else %}
+                                <button type="button" disabled>
+                                    <img src="{% static 'img/strel_sum.svg' %}" style="    transform: rotate(-90deg);
+    margin-right: 12px;" alt=""><span>Предыдущая страница</span>
+                                </button>
+                                {% endif %}
+
+                                {# Номера страниц (page_items: [1, '…', 8, 9, 10, '…', 59]) #}
+                                {% for it in page_items %}
+                                {% if it == "…" %}
+                                    <button type="button" class="carservice_our_work_btn_numbers" disabled>...</button>
+                                {% else %}
+                                    {% if it == page_obj.number %}
+                                    <button type="button" class="carservice_our_work_btn_numbers carservice_our_work_btn_numbers_active" disabled>{{ it }}</button>
+                                    {% else %}
+                                    <button type="submit" name="page" value="{{ it }}" class="carservice_our_work_btn_numbers">{{ it }}</button>
+                                    {% endif %}
+                                {% endif %}
+                                {% endfor %}
+
+                                {# Следующая #}
+                                {% if page_obj.has_next %}
+                                <button type="submit" name="page" value="{{ page_obj.next_page_number }}">
+                                    <span>Следующая страница</span><img src="{% static 'img/strel_sum.svg' %}" alt="">
+                                </button>
+                                {% else %}
+                                <button type="button" disabled>
+                                    <span>Следующая страница</span><img src="{% static 'img/strel_sum.svg' %}" alt="">
+                                </button>
+                                {% endif %}
+                            </form>
+                            </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="last_collection pt-5 pb-5">
+  <div class="container">
+    <div class="last_collection_con">
+      <div class="row">
+        <div class="col-12">
+          <h2>Ранее вы смотрели</h2>
+        </div>
+
+        {% for p in recent_products %}
+          {# третью колонку скрываем на < xl, как у тебя #}
+          <div class="col-xl-4 col-md-6 {% if forloop.counter == 3 %}d-xl-block d-none{% endif %}">
+            <a class="text-decoration-none" href="{% url 'catalog:product_detail' p.slug %}">
+              <div class="last_collection_con_cart2">
+                {% with img=p.images.all.0 %}
+                  {% if img %}<img src="{{ img.image.url }}" alt="{{ p.title }}">{% else %}
+                              <img src="{% static 'img/placeholder.png' %}" loading="lazy">{% endif %}
+                {% endwith %}
+                <div class="last_collection_con_cart2_desc">
+                  <h2>{{ p.title }}</h2>
+                  <div class="last_collection_price">
+                    <h5>{{ p.price|money }}</h5>
+                    <h6>{{ p.price|old_price|money }}</h6>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% empty %}
+          <div class="col-12"><p class="text-muted">Список пуст.</p></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+
+{% endblock %}
+{% block extra_js %}
+<script>
+  new TomSelect("#select-beast",{
+	create: true,
+	sortField: {
+		field: "text",
+		direction: "asc"
+	}
+});
+  new TomSelect("#select-beast1",{
+	create: true,
+	sortField: {
+		field: "text",
+		direction: "asc"
+	}
+});
+  new TomSelect("#select-beast2",{
+	create: true,
+	sortField: {
+		field: "text",
+		direction: "asc"
+	}
+});
+</script>
+<script>
+(function(){
+  // На touch-устройствах не трогаем — оставляем нативный селект
+  var isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  document.querySelectorAll(".one_select_catalog .form-select.js-selectify").forEach(function(sel){
+    if (isTouch) return; // мобильные — пропускаем
+
+    // обёртка рядом с твоей .one_select_catalog
+    var wrap = document.createElement("div");
+    wrap.className = "selectify" + (sel.disabled ? " is-disabled" : "");
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.style.display = "none"; // прячем настоящий select
+
+    // кнопка + список
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "selectify__btn";
+    btn.setAttribute("aria-haspopup","listbox");
+    btn.setAttribute("aria-expanded","false");
+    wrap.appendChild(btn);
+
+    var list = document.createElement("div");
+    list.className = "selectify__list";
+    list.setAttribute("role","listbox");
+    wrap.appendChild(list);
+
+    function getLabel(){
+      var cur = sel.options[sel.selectedIndex];
+      if (cur && cur.value !== "") return cur.textContent.trim();
+      // плейсхолдер — берём disabled/hidden опцию (если есть)
+      var ph = sel.querySelector("option[disabled][hidden]") || sel.querySelector("option[disabled][value='']");
+      return ph ? ph.textContent.trim() : (cur ? cur.textContent.trim() : "Выбрать");
+    }
+
+    function renderButton(){
+      var isPlaceholder = (sel.selectedIndex <= 0) || (sel.value === "");
+      btn.innerHTML = '<span class="'+(isPlaceholder?'selectify__placeholder':'')+'">'+ getLabel() +'</span>';
+    }
+
+    function renderList(){
+      list.innerHTML = "";
+      Array.from(sel.options).forEach(function(opt){
+        // скрываем placeholder-опцию из меню
+        if (opt.disabled && (opt.hasAttribute("hidden") || opt.value === "")) return;
+        var item = document.createElement("div");
+        item.className = "selectify__opt";
+        item.setAttribute("role","option");
+        item.setAttribute("data-value", opt.value);
+        if (opt.selected) item.setAttribute("aria-selected","true");
+        item.textContent = opt.textContent;
+        item.addEventListener("click", function(){
+          if (sel.value !== opt.value) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event("change", {bubbles:true}));
+          }
+          close();
+        });
+        list.appendChild(item);
+      });
+    }
+
+    function open(){
+      wrap.classList.add("is-open");
+      btn.setAttribute("aria-expanded","true");
+      // вращаем твою стрелку на внешней обёртке
+      var host = wrap.closest(".one_select_catalog");
+      if (host) host.classList.add("is-open");
+
+      // подсветить текущий пункт и фокус на нём
+      updateCurrentItem();
+      document.addEventListener("click", outsideOnce, {capture:true, once:true});
+      document.addEventListener("keydown", onKey);
+    }
+
+    function close(){
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded","false");
+      var host = wrap.closest(".one_select_catalog");
+      if (host) host.classList.remove("is-open");
+
+      document.removeEventListener("keydown", onKey);
+    }
+
+    function outsideOnce(e){
+      if (!wrap.contains(e.target)) close();
+      else document.addEventListener("click", outsideOnce, {capture:true, once:true});
+    }
+
+    function updateCurrentItem(move){
+      var items = Array.from(list.querySelectorAll(".selectify__opt"));
+      var idx = items.findIndex(function(n){ return n.getAttribute("aria-selected")==="true"; });
+      if (idx < 0) idx = 0;
+      if (move === "down") idx = Math.min(idx+1, items.length-1);
+      if (move === "up")   idx = Math.max(idx-1, 0);
+      items.forEach(function(n){ n.classList.remove("is-current"); });
+      var cur = items[idx];
+      if (cur){
+        cur.classList.add("is-current");
+        cur.scrollIntoView({block:"nearest"});
+      }
+    }
+
+    function selectCurrent(){
+      var cur = list.querySelector(".selectify__opt.is-current");
+      if (cur){
+        var val = cur.getAttribute("data-value");
+        if (sel.value !== val) {
+          sel.value = val;
+          sel.dispatchEvent(new Event("change", {bubbles:true}));
+        }
+      }
+      close();
+      btn.focus();
+    }
+
+    function onKey(e){
+      if (e.key === "ArrowDown"){ e.preventDefault(); updateCurrentItem("down"); }
+      else if (e.key === "ArrowUp"){ e.preventDefault(); updateCurrentItem("up"); }
+      else if (e.key === "Enter"){ e.preventDefault(); selectCurrent(); }
+      else if (e.key === "Escape"){ e.preventDefault(); close(); btn.focus(); }
+      else if (e.key === "Home"){ e.preventDefault(); updateCurrentItem(); }
+      else if (e.key === "End"){ e.preventDefault();
+        var items = list.querySelectorAll(".selectify__opt");
+        items.forEach(n=>n.classList.remove("is-current"));
+        var last = items[items.length-1];
+        if (last){ last.classList.add("is-current"); last.scrollIntoView({block:"nearest"}); }
+      }
+    }
+
+    btn.addEventListener("click", function(){
+      if (wrap.classList.contains("is-open")) close(); else open();
+    });
+
+    // Синхронизация внешнего вида при смене значения извне
+    sel.addEventListener("change", function(){
+      // обновить aria-selected
+      var v = sel.value;
+      list.querySelectorAll(".selectify__opt").forEach(function(n){
+        n.toggleAttribute("aria-selected", n.getAttribute("data-value") === v);
+      });
+      renderButton();
+    });
+
+    // Обновлять состояние disabled, если меняется динамически
+    var mo = new MutationObserver(function(){
+      wrap.classList.toggle("is-disabled", sel.disabled);
+      btn.disabled = sel.disabled;
+    });
+    mo.observe(sel, {attributes:true, attributeFilter:["disabled"]});
+
+    // Инициализация
+    renderButton();
+    renderList();
+  });
+})();
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  // Определяем имя списка без падений на None
+  var LIST_NAME = (function () {
+    {% if current_sub and current_sub.name %}
+      return "{{ current_sub.name|escapejs }}";
+    {% elif current_cat and current_cat.name %}
+      return "{{ current_cat.name|escapejs }}";
+    {% else %}
+      return "Каталог";
+    {% endif %}
+  })();
+
+   var impressions = [
+    {% for product in page_obj %}
+    (function(){
+      var id = "{{ product.sku|default_if_none:product.id|escapejs }}";
+      var name = "{{ product.title|default_if_none:''|escapejs }}";
+
+      // БЕЗ unlocalize: берём число как есть, убираем пробелы/нецифры, запятую -> точку
+      var priceStr = "{{ product.price|floatformat:'2' }}";
+      priceStr = priceStr.replace(/[^\d.,-]/g, '').replace(/\s+/g,'').replace(',', '.');
+      var price = parseFloat(priceStr) || 0;
+
+      var brand = "{{ product.brand|default_if_none:''|escapejs }}";
+      var category = "{% if product.category %}{% if product.category.parent %}{{ product.category.parent.name|escapejs }} / {% endif %}{{ product.category.name|escapejs }}{% else %}{% endif %}";
+
+      return {
+        id: id,
+        name: name,
+        price: price,
+        brand: brand,
+        category: category,
+        list: LIST_NAME,
+        position: {{ forloop.counter }}
+      };
+    })(){% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ];
+
+  // Отправляем impressions одним пушем
+  window.dataLayer.push({
+    ecommerce: {
+      currencyCode: "RUB",
+      impressions: impressions
+    }
+  });
+
+  // Трекинг клика по карточке (без зависимостей от серверных переменных)
+  document.addEventListener('click', function(e){
+    const cardLink = e.target.closest('.last_collection_con_cart a, .last_collection_con_cart .stretched-link, a[href]');
+    if (!cardLink) return;
+
+    const card = e.target.closest('.last_collection_con_cart');
+    if (!card) return;
+
+    const nameEl = card.querySelector('h2');
+    const skuEl  = card.querySelector('h3');
+    const name   = nameEl ? nameEl.textContent.trim() : '';
+    const sku    = skuEl ? skuEl.textContent.trim() : '';
+    const pos    = card.parentElement && card.parentElement.parentElement
+      ? Array.prototype.indexOf.call(card.parentElement.parentElement.children, card.parentElement) + 1
+      : 1;
+
+    window.dataLayer.push({
+      ecommerce: {
+        currencyCode: "RUB",
+        click: {
+          products: [{
+            id: sku || '',
+            name: name,
+            list: LIST_NAME,
+            position: pos
+          }]
+        }
+      }
+    });
+  }, {passive:true});
+</script>
+
+
+
+{% endblock %}

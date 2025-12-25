@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> /
+                    <a href="{% url 'catalog:product_list' %}">Каталог</a>
+                </div>
+            </div>
+            <div class="col-xl-3 d-xl-block d-none">
+                <div class="carservice_menu">
+                    <div class="carservice_menu">
+                    <p><a href="{% url 'catalog:account_orders' %}">Мои заказы</a></p>
+                    <p><a href="{% url 'catalog:account_profile' %}">Личные данные</a></p>
+                    <p><a href="{% url 'catalog:account_password' %}">Сменить пароль</a></p>
+                    <p><a href="{% url 'catalog:favorites' %}">Избранное</a></p>
+                    <p><a href="{% url 'catalog:cart_detail' %}">Корзина</a></p>
+                </div>
+                </div>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'catalog:logout' %}"><button class="lk_btn">Выйти</button></a>
+                {% else %}
+                <a href="#" data-bs-toggle="modal" data-bs-target="#loginModal"><button class="lk_btn">Войти</button></a>
+                {% endif %}
+            </div>
+            <div class="col-xl-9">
+                <h1>Спасибо!</h1>
+<p>Ваш заказ № {{ order.id }} принят. Мы свяжемся с вами.</p>
+            </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <h4>Чип-тюнинг — конфигурации</h4>
+  <form class="mb-3">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск: год, мотор">
+  </form>
+
+  <table class="table table-sm align-middle">
+    <thead><tr>
+      <th>ID</th><th>Год</th><th>Мотор</th><th></th>
+    </tr></thead>
+    <tbody>
+      {% for c in page_obj %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.year }}</td>
+        <td>{{ c.engine }}</td>
+        <td><a class="btn btn-sm btn-outline-primary" href="{% url 'catalog:m_chip_detail' c.id %}">Открыть</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted">Пусто</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}

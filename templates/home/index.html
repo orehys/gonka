@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+{% load static money %}
+
+{% block content %}
+    <style>
+        .main .owl-carousel { position: relative; }
+        .main .owl-dots {
+        position: absolute;
+        left: 0; right: 0; bottom: 16px;
+        display: flex; justify-content: center; gap: 8px;
+        }
+        .main .owl-dot span {
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #fff; opacity: .5; display: block;
+        }
+        .main .owl-dot.active span { opacity: 1; }
+
+        .main-hero-img {
+        display: block;
+        width: 100%;
+        }
+        .owl-theme .owl-dots .owl-dot span{
+            background: white;
+        }
+        @media (max-width: 767px) {
+          .brand-item{
+            width: 150px !important;
+          }
+        }
+        body{
+          overflow-x: hidden;
+        }
+        .one_category_img{
+          width: auto;
+        }
+        /* поле (нативный select) оставляем «полированным», как раньше */
+.form-select.js-cascade-selectify {
+  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  width:100%;
+  padding:10px 42px 10px 12px;
+  border-radius:12px; border:1px solid #E6E6E6;
+  background:#F8F8F8; color:#1A1A1A;
+  font:400 14px/18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  box-shadow:none; background-image:none;
+}
+.form-select.js-cascade-selectify:hover:not(:disabled){ border-color:#DCDCDC; background:#F4F4F4; }
+.form-select.js-cascade-selectify:focus{
+  outline:0; border-color:#4339DA; box-shadow:0 0 0 4px rgba(67,57,218,.12); background:#fff;
+}
+.form-select.js-cascade-selectify:disabled{
+  background:#F6F6F6; color:#9B9B9B; border-color:#EEE; cursor:not-allowed;
+}
+.form-select.js-cascade-selectify::-ms-expand{ display:none; }
+
+/* обёртка кастомки */
+.cascade-selectify{ position:relative; width:100%; }
+.cascade-selectify.is-disabled{ opacity:.6; pointer-events:none; }
+
+/* кнопка-заменитель */
+.cascade-selectify__btn{
+  width:100%; text-align:left; cursor:pointer;
+   color:#1A1A1A;
+  border: 2px solid #E8E8EA; border-radius:12px; outline:none;
+  background-color: white; margin-top: 12px;  
+  padding:12px; height: 48px;
+  font:400 14px/18px Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif; color: #1C1C1C;position: relative;  
+}
+.cascade-selectify__btn::after{
+  content:"";
+  position:absolute;
+  top:50%; right:12px;
+  transform:translateY(-50%) rotate(180deg);
+  width:20px; height:20px;
+  background:url("/static/img/strel_sum.svg") center/contain no-repeat; /* путь к иконке */
+  pointer-events:none;
+  opacity:.7;
+  transition:transform .2s ease, opacity .2s ease;
+}
+.cascade-selectify.is-open .cascade-selectify__btn::after{
+  transform:translateY(-50%) rotate(180deg);
+  opacity:1;
+}
+.cascade-selectify.is-disabled .cascade-selectify__btn::after{
+  opacity:.35;
+}
+.cascade-selectify__btn:focus{
+  border-color:#4339DA; box-shadow:0 0 0 4px rgba(67,57,218,.12); background:#fff;
+}
+
+
+
+/* выпадающий список */
+.cascade-selectify__list{
+  position:absolute; z-index:50; left:0; right:0; top:calc(100% + 6px);
+  background:#fff; color:#111;
+  border:1px solid #E6E6E6; border-radius:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  max-height:280px; overflow:auto; padding:6px;
+  display:none;
+}
+.cascade-selectify.is-open .cascade-selectify__list{ display:block; }
+
+/* пункт */
+.cascade-selectify__opt{
+  padding:10px 12px; border-radius:10px; cursor:pointer; user-select:none;
+}
+.cascade-selectify__opt:hover,
+.cascade-selectify__opt[aria-selected="true"]{ background:#F4F4F4; }
+
+.cascade-selectify__opt.is-current{ outline:2px solid rgba(67,57,218,.25); }
+.cascade-selectify__placeholder{ color:#9B9B9B; }
+
+    </style>
+    <section class="main">
+    <div class="container position-relative">
+
+</div>
+
+    </section>
+
+    <section class="finder pb-5">
+        <div class="container">
+            <h2>Найдите запчасти для автомобиля: шаг за шагом</h2>
+            <h3>Введите параметры вашего автомобиля для подбора запачастей</h3>
+            <form id="homeFilterForm" class="row" method="get" action="{% url 'catalog:product_list' %}">
+              <div class="col-md-3 col-6">
+                <select name="make" id="filterMake" class="form-select js-cascade-selectify">
+                  <option value="">Марка</option>
+                  {% for v in makes %}<option value="{{ v|escape }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <select name="model" id="filterModel" class="form-select js-cascade-selectify">
+                  <option value="">Модель</option>
+                  {% for v in models_ %}<option value="{{ v|escape }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <select name="brand" id="filterBrand" class="form-select js-cascade-selectify">
+                  <option value="">Производитель</option>
+                  <option value="*">Любой производитель</option>
+                  {% for v in brands %}<option value="{{ v|escape }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <select name="engine" id="filterEngine" class="form-select js-cascade-selectify">
+                  <option value="">Двигатель</option>
+                  <option value="*">Любой мотор</option>
+                  {% for v in engines %}<option value="{{ v|escape }}">{{ v }}</option>{% endfor %}
+                </select>
+              </div>
+            </form>
+
+
+        </div>
+    </section>
+    <section class="categories">
+      <div class="container">
+            <div class="row">
+    <div class="col-12 center" style="display: flex;justify-content: center;">
+                    <a href="{% url 'catalog:product_list' %}"><button style="background-color: #4339DA; color: white;">Перейти в каталог <img src="{% static 'img/Caret_Down_MD.svg' %}" alt="" style="transform: rotate(90deg);"></button></a>
+                    </div></div>
+      </div>
+    </section>
+    <section class="categories pt-3 pb-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <a href="/catalog/?cat=turbo"><div class="one_category one_category2" style="background: url('{% static 'img/cat1.png' %}') center/cover no-repeat;">
+                      
+                        <p>Турбины</p>
+                        <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                    </div></a>
+                    <a href="/catalog/?cat=vykhlopnaya_sistema"><div class="one_category one_category2 mt-lg-0 d-lg-block d-none   mt-3" style="background: url('{% static 'img/cat6.png' %}') center/cover no-repeat;">
+                        <p>Выхлопные системы</p>
+                        <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                    </div></a>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <a href="/catalog/?cat=dvigatel"><div class="one_category" style="background: url('{% static 'img/cat2.png' %}') center/cover no-repeat;">
+                        <p>Комплектующие двигателя</p>
+                        <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                    </div></a>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row">
+                      <div class="col-6">
+                        <a href="/catalog/?cat=tormoza"><div class="one_category one_category2 " style="background: url('{% static 'img/cat3.png' %}') center/cover no-repeat;">
+                            <p>Тормозные системы</p>
+                            <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                        </div></a>
+                      </div>
+                      <div class="col-6">
+                        <a href="/catalog/?cat=masla_i_spetszhidkosti"><div class="one_category one_category2 " style="background: url('{% static 'img/cat4.png' %}') center/cover no-repeat;">
+                            <p>Масла и жидкости</p>
+                            <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                        </div></a>
+                      </div>
+                      <div class="col-lg-12 col-6">
+                        <a href="/catalog/?cat=podveska"><div class="one_category one_category2 mt-lg-0 mt-3" style="background: url('{% static 'img/cat5.png' %}') center/cover no-repeat;">
+                        <p>Амортизаторы и комплектующие </p>
+                        <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                    </div></a>
+                      </div>
+                      <div class="col-6">
+                                            <a href="/catalog/?cat=vykhlopnaya_sistema"><div class="one_category one_category2 mt-lg-0 d-lg-none d-block   mt-3" style="background: url('{% static 'img/cat6.png' %}') center/cover no-repeat;">
+                        <p>Выхлопные системы</p>
+                        <img src="{% static 'img/strel_cat.svg' %}" alt="">
+                    </div></a>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="cta pt-2 pb-5">
+        <div class="container">
+            {% if page %}{{ page.content_html|safe }}{% endif %}
+            <div class="row">
+              <div class="col-lg-10 offset-lg-1">
+                  <form action="{% url 'catalog:service_lead_submit' %}" method="post" class="carservice_form_con mb-0">
+                  {% csrf_token %}
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <h4>Имя <span>*</span></h4>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Введите как мы можем к вам обращаться..."
+                        class="mb-3 mb-sm-0"
+                        required
+                        value="{{ form.name.value|default_if_none:'' }}"
+                      >
+                    </div>
+                    <div class="col-sm-6">
+                      <h4>Телефон <span>*</span></h4>
+                      <input
+                        type="text"
+                        name="phone"
+                        placeholder="Введите ваш телефон..."
+                        required
+                        value="{{ form.phone.value|default_if_none:'' }}"
+                      >
+                    </div>
+                    <div class="col-12">
+                      <h4 style="margin-top: 18px;">Комментарий <span>*</span></h4>
+                      <textarea
+                        name="comment"
+                        required
+                        placeholder="Распишите перечень работ по вашему автомобилю..."
+                      >{{ form.comment.value|default_if_none:'' }}</textarea>
+
+                      <!-- hidden как были -->
+                      <input type="hidden" name="make"   value="{{ make|default_if_none:'' }}">
+                      <input type="hidden" name="model"  value="{{ model|default_if_none:'' }}">
+                      <input type="hidden" name="year"   value="{{ year|default_if_none:'' }}">
+                      <input type="hidden" name="engine" value="{{ engine|default_if_none:'' }}">
+                      <input type="hidden" name="next"   value="{{ request.get_full_path }}">
+
+                      <div class="pd-consent-wrap">
+                        <label class="pd-consent">
+                          <input
+                            type="checkbox"
+                            class="pd-consent__cb"
+                            name="pd_consent"
+                            required
+                            style="width:auto;height:auto;margin-top:0;"
+                            {% if form.pd_consent.value %}checked{% endif %}
+                          >
+                          <span>Я согласен(на) на обработку персональных данных
+                            <a href="{% url 'page_agreement_short' %}" target="_blank" rel="noopener">— подробные условия</a>
+                          </span>
+                        </label>
+                        <div class="pd-consent__error" aria-live="polite"></div>
+                      </div>
+
+                      <!-- reCAPTCHA v2 -->
+                      <div class="mt-3">
+                        <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
+                      </div>
+
+                      <div class="d-flex justify-content-between align-items-center w-100">
+                        <button>Отправить</button>
+
+                      </div>
+                    </div>
+                  </div>
+                </form>
+
+              </div>
+            </div>
+        </div>
+    </section>
+
+
+<style>
+  /* герой (если нужен) — точки ближе */
+  #homeHero .owl-dots { margin-top: 8px; }
+
+  /* бренд-карточка */
+  .brand-item{
+    display:flex; align-items:center; justify-content:center;
+    height:96px; width:214px; max-width:100%;
+    background:#f8f8f8; border-radius:12px; padding:8px;
+    color:#9aa; text-decoration:none;
+    transition:transform .2s ease;
+  }
+  .brand-item:hover{ transform:scale(1.03); }
+  .brand-item img{ max-height:64px; max-width:100%; object-fit:contain; }
+  .brand-item span{
+    font-family:Roboto,system-ui,-apple-system,Segoe UI,Arial;
+    font-size:14px; color:#9aa;
+  }
+
+  /* точки */
+  #brandSlider .owl-dots{ margin-top:12px; }
+</style>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form      = document.getElementById('homeFilterForm');
+  if (!form) return;
+
+  const selMake   = document.getElementById('filterMake');
+  const selModel  = document.getElementById('filterModel');
+  const selBrand  = document.getElementById('filterBrand');
+  const selEngine = document.getElementById('filterEngine');
+
+  const API = "{% url 'catalog:api_filter_options' %}";
+
+  // Добавляет опции: плейсхолдер (пустой), при needAny — ещё «Любой …» со значением "*"
+  function fillSelect(select, values, placeholder, needAny=false, anyText="Любой") {
+    const current = select.value;
+    select.innerHTML = "";
+
+    // плейсхолдер (не выбранное состояние)
+    const opt0 = document.createElement('option');
+    opt0.value = "";
+    opt0.textContent = placeholder;
+    select.appendChild(opt0);
+
+    // «Любой …» (учитывается как выбранное значение)
+    if (needAny) {
+      const oAny = document.createElement('option');
+      oAny.value = "*";
+      oAny.textContent = anyText;
+      select.appendChild(oAny);
+    }
+
+    values.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v;
+      select.appendChild(opt);
+    });
+
+    // вернуть прежний выбор, если он доступен; иначе держим плейсхолдер (пусто)
+    if (current && [...select.options].some(o => o.value === current)) {
+      select.value = current;
+    } else {
+      select.value = "";
+    }
+  }
+
+  async function refreshCascade() {
+    const params = new URLSearchParams({
+      make:   selMake.value   || "",
+      model:  selModel.value  || "",
+      engine: selEngine.value || "",
+    });
+    const resp = await fetch(`${API}?${params.toString()}`, {
+      headers: {'X-Requested-With':'XMLHttpRequest'}
+    });
+    const data = await resp.json();
+
+    // Модель — без «Любой»
+    fillSelect(selModel,  data.models || [],  "Модель");
+    // Мотор — с «Любой мотор»
+    fillSelect(selEngine, data.engines || [], "Двигатель", true, "Любой мотор");
+    // Бренд — с «Любой производитель»
+    fillSelect(selBrand,  data.brands || [],  "Производитель", true, "Любой производитель");
+
+    // доступность
+    selModel.disabled  = !selMake.value;
+    selEngine.disabled = !selMake.value; // доступен после выбора марки
+    selBrand.disabled  = false;
+  }
+
+  // Все поля должны быть выбраны (пустые — нет; "*" — считается как «выбрано»)
+  const required = ['make','model','brand','engine'];
+  function allChosen() {
+    return required.every(name => {
+      const el = form.elements[name];
+      if (!el) return false;
+      const v = (el.value || '').trim();
+      return v !== ''; // "*" пройдёт, "" — нет
+    });
+  }
+
+  // Перед сабмитом убираем из запроса поля со значением "*"
+  function disableAnyAndReturnRestorer() {
+    const toRestore = [];
+    ['brand','engine'].forEach(name => {
+      const el = form.elements[name];
+      if (el && el.value === '*') {
+        el.disabled = true;
+        toRestore.push(el);
+      }
+    });
+    return () => toRestore.forEach(el => el.disabled = false);
+  }
+
+  async function handleChangeAndMaybeSubmit() {
+    await refreshCascade();
+    if (allChosen()) {
+      const restore = disableAnyAndReturnRestorer();
+      form.submit();
+      setTimeout(restore, 0);
+    }
+  }
+
+  // Подписки
+  selMake.addEventListener('change',  () => { selModel.value=''; selEngine.value=''; selBrand.value=''; handleChangeAndMaybeSubmit(); });
+  selModel.addEventListener('change', () => { selEngine.value=''; selBrand.value=''; handleChangeAndMaybeSubmit(); });
+  selEngine.addEventListener('change',() => { handleChangeAndMaybeSubmit(); });
+  selBrand.addEventListener('change', () => { handleChangeAndMaybeSubmit(); });
+
+  // Инициализация
+  selModel.disabled  = !selMake.value;
+  selEngine.disabled = !selMake.value;
+  selBrand.disabled  = false;
+
+  if (selMake.value) {
+    // если марка уже выбрана (например, после возврата назад)
+    refreshCascade();
+  }
+});
+</script>
+
+
+<script>
+  $(function () {
+    $('.main-hero').owlCarousel({
+      items: 1,
+      loop: true,
+      autoplay: true,
+      autoplayTimeout: 3000,
+      autoplayHoverPause: true,
+      dots: true,
+      nav: false,
+      smartSpeed: 600,
+      touchDrag: true,
+      mouseDrag: true
+    });
+    $('#brandSlider').owlCarousel({
+      loop: true,
+      dots: false,
+      nav: false,
+      margin: 16,
+      mouseDrag: true,   // ЛКМ тянем — работает
+      touchDrag: true,   // свайп на мобилке
+      pullDrag: true,
+      autoplay: true,
+      autoplayTimeout: 1000,
+      smartSpeed: 400,
+      responsive: {
+        0:   { items: 2 },
+        576: { items: 4 },
+        768: { items: 5 },
+        1200:{ items: 7 }
+      }
+    });
+  });
+</script>
+<script>
+(function(){
+  var isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  document.querySelectorAll("select.js-cascade-selectify").forEach(function(sel){
+    if (isTouch) return; // мобильным оставим нативный UX
+
+    // создаём обёртку
+    var wrap = document.createElement("div");
+    wrap.className = "cascade-selectify" + (sel.disabled ? " is-disabled" : "");
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    sel.style.display = "none";
+
+    // кнопка
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cascade-selectify__btn";
+    btn.setAttribute("aria-haspopup","listbox");
+    btn.setAttribute("aria-expanded","false");
+    // позиционирование псевдоэлемента стрелки — на wrap
+    btn.style.position = "relative";
+    wrap.appendChild(btn);
+
+    // список
+    var list = document.createElement("div");
+    list.className = "cascade-selectify__list";
+    list.setAttribute("role","listbox");
+    wrap.appendChild(list);
+
+    function currentLabel(){
+      var cur = sel.options[sel.selectedIndex];
+      if (cur && cur.value !== "") return cur.textContent.trim();
+      // плейсхолдер — первая опция с value=""
+      var ph = sel.querySelector('option[value=""]') || sel.options[0];
+      return ph ? ph.textContent.trim() : "Выбрать";
+    }
+
+    function renderButton(){
+      var isPlaceholder = (sel.value === "" || sel.selectedIndex <= 0);
+      btn.innerHTML = '<span class="'+(isPlaceholder?'cascade-selectify__placeholder':'')+'">'+ currentLabel() +'</span>';
+    }
+
+    function renderList(){
+      list.innerHTML = "";
+      Array.from(sel.options).forEach(function(opt){
+        // плейсхолдер (value="") показывать в меню не будем
+        if (opt.value === "") return;
+        var it = document.createElement("div");
+        it.className = "cascade-selectify__opt";
+        it.setAttribute("role","option");
+        it.setAttribute("data-value", opt.value);
+        if (opt.selected) it.setAttribute("aria-selected","true");
+        it.textContent = opt.textContent;
+        it.addEventListener("click", function(){
+          if (sel.value !== opt.value){
+            sel.value = opt.value;
+            // отдадим управление твоим слушателям
+            sel.dispatchEvent(new Event("change", {bubbles:true}));
+          }
+          close();
+        });
+        list.appendChild(it);
+      });
+    }
+
+    function open(){
+      wrap.classList.add("is-open");
+      btn.setAttribute("aria-expanded","true");
+      document.addEventListener("click", closeOnOutside, {capture:true, once:true});
+      document.addEventListener("keydown", onKey);
+      highlightCurrent();
+    }
+    function close(){
+      wrap.classList.remove("is-open");
+      btn.setAttribute("aria-expanded","false");
+      document.removeEventListener("keydown", onKey);
+    }
+    function closeOnOutside(e){
+      if (!wrap.contains(e.target)) close();
+      else document.addEventListener("click", closeOnOutside, {capture:true, once:true});
+    }
+
+    function highlightCurrent(move){
+      var items = Array.from(list.querySelectorAll(".cascade-selectify__opt"));
+      var idx = Math.max(0, items.findIndex(n => n.getAttribute("aria-selected")==="true"));
+      if (move === "down") idx = Math.min(idx+1, items.length-1);
+      if (move === "up")   idx = Math.max(idx-1, 0);
+      items.forEach(n => n.classList.remove("is-current"));
+      var cur = items[idx]; if (cur){ cur.classList.add("is-current"); cur.scrollIntoView({block:"nearest"}); }
+    }
+    function onKey(e){
+      if (e.key === "ArrowDown"){ e.preventDefault(); highlightCurrent("down"); }
+      else if (e.key === "ArrowUp"){ e.preventDefault(); highlightCurrent("up"); }
+      else if (e.key === "Enter"){ e.preventDefault(); var cur=list.querySelector(".cascade-selectify__opt.is-current"); cur?.click(); }
+      else if (e.key === "Escape"){ e.preventDefault(); close(); btn.focus(); }
+    }
+
+    btn.addEventListener("click", function(){
+      wrap.classList.contains("is-open") ? close() : open();
+    });
+
+    // синхронизация при смене значения
+    sel.addEventListener("change", function(){
+      var v = sel.value;
+      list.querySelectorAll(".cascade-selectify__opt").forEach(function(n){
+        n.toggleAttribute("aria-selected", n.getAttribute("data-value") === v);
+      });
+      renderButton();
+    });
+
+    // наблюдаем изменения: options полностью пересобираются твоим скриптом
+    var mo = new MutationObserver(function(muts){
+      // если изменился список опций — перерисуем меню
+      if (muts.some(m => m.type === "childList")) {
+        renderList();
+        renderButton(); // подтянуть новый плейсхолдер/значение
+      }
+      // disabled
+      if (muts.some(m => m.type === "attributes" && m.attributeName === "disabled")){
+        wrap.classList.toggle("is-disabled", sel.disabled);
+        btn.disabled = sel.disabled;
+      }
+    });
+    mo.observe(sel, { childList:true, subtree:false, attributes:true, attributeFilter:["disabled"] });
+
+    // первичная отрисовка
+    renderButton();
+    renderList();
+  });
+})();
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,106 @@
+
+{% extends "manage/base_admin.html" %}
+{% load money static %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-auto">
+      <input class="form-control" name="q" value="{{ q }}" placeholder="Поиск по названию/SKU">
+    </div>
+
+    <div class="col-auto">
+      <select class="form-select" name="status" onchange="this.form.submit()">
+        <option value=""        {% if not status %}selected{% endif %}>Все статусы</option>
+        <option value="site"    {% if status == 'site' %}selected{% endif %}>На сайте</option>
+        <option value="hidden"  {% if status == 'hidden' %}selected{% endif %}>Скрыт</option>
+        <option value="in"      {% if status == 'in' %}selected{% endif %}>В наличии</option>
+        <option value="pre"     {% if status == 'pre' %}selected{% endif %}>Под заказ</option>
+      </select>
+    </div>
+
+    <div class="col-auto">
+      <button class="btn btn-primary">Искать</button>
+      <a class="btn btn-outline-secondary" href="{% url 'catalog:m_products' %}">Сброс</a>
+      <a class="btn btn-primary" href="{% url 'catalog:m_product_add' %}">Добавить товар</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Фото</th>
+          <th>Название</th>
+          <th>SKU</th>
+          <th>Цена</th>
+          <th>Статус</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for p in page_obj %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td style="width:72px">
+            {% with img=p.images.all.0 %}
+              {% if img %}<img src="{{ img.image.url }}" class="img-thumbnail" style="width:64px;height:64px;object-fit:cover">{% endif %}
+            {% endwith %}
+          </td>
+          <td>{{ p.title }}</td>
+          <td><code>{{ p.sku }}</code></td>
+          <td>{{ p.price|money }}</td>
+          <td>
+            {% if p.is_active %}
+              <span class="badge text-bg-success">на сайте</span>
+            {% else %}
+              <span class="badge text-bg-secondary">скрыт</span>
+            {% endif %}
+
+            {% if p.in_stock %}
+              <span class="badge text-bg-success">в наличии</span>
+            {% else %}
+              <span class="badge text-bg-warning">под заказ</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'catalog:m_product_detail' p.id %}" target="_blank">Подробнее</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-muted">Нет товаров</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Пагинация с номерами и многоточием -->
+  <nav>
+    <ul class="pagination pagination-sm mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?{{ query_base }}&page={{ page_obj.previous_page_number }}">‹</a>
+        </li>
+      {% endif %}
+
+      {% for it in page_items %}
+        {% if it == '…' %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% elif it == page_obj.number %}
+          <li class="page-item active"><span class="page-link">{{ it }}</span></li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?{{ query_base }}&page={{ it }}">{{ it }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?{{ query_base }}&page={{ page_obj.next_page_number }}">›</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / <a href="{% url 'page_help_short' %}">Доставка и оплата</a> / <a href="{% url 'catalog:page_payment' %}">Условия оплаты</a>
+                </div>
+            </div>
+            <div class="col-lg-3 d-lg-block d-none">
+                <div class="carservice_menu">
+                    <p><a href="{% url 'page_help_short' %}">FAQ</a></p>
+                    <p><a href="{% url 'catalog:page_delivery' %}">Условия доставки</a></p>
+                    <p><a href="{% url 'catalog:page_payment' %}">Условия оплаты</a></p>
+                </div>
+            </div>
+            <div class="col-lg-9">
+                <div class="deliv_and_pay">
+                    {% if page %}{{ page.content_html|safe }}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

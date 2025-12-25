@@ -1,0 +1,9 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<h4>Удаление</h4>
+<p class="text-danger">Точно удалить «{{ obj }}»?</p>
+<form method="post">{% csrf_token %}
+  <button class="btn btn-danger">Удалить</button>
+  <a href="{{ back }}" class="btn btn-outline-secondary">Отмена</a>
+</form>
+{% endblock %}

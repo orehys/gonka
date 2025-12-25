@@ -1,0 +1,10 @@
+{% extends "manage/base_admin.html" %}
+{% block content %}
+<h4>SEO</h4>
+<div class="list-group">
+  <a class="list-group-item list-group-item-action" href="{% url 'catalog:m_seo_entries' %}">SEO-записи <span class="badge bg-secondary">{{ cnt_entries }}</span></a>
+  <a class="list-group-item list-group-item-action" href="{% url 'catalog:m_redirects' %}">Редиректы <span class="badge bg-secondary">{{ cnt_redirects }}</span></a>
+  <a class="list-group-item list-group-item-action" href="{% url 'catalog:m_gone' %}">410 Gone <span class="badge bg-secondary">{{ cnt_gone }}</span></a>
+  <a class="list-group-item list-group-item-action" href="{% url 'catalog:m_robots' %}">robots.txt {% if has_robots %}<span class="badge bg-success">ok</span>{% endif %}</a>
+</div>
+{% endblock %}

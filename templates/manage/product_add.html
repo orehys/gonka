@@ -1,0 +1,93 @@
+{% extends "manage/base_admin.html" %}
+{% load static %}
+{% block content %}
+<div class="bg-white p-3 rounded shadow-sm">
+  <h4 class="mb-3">Новый товар</h4>
+
+  <form method="post" enctype="multipart/form-data" class="row g-3">
+    {% csrf_token %}
+
+    <div class="col-md-8">
+      <label class="form-label">Название *</label>
+      <input type="text" name="title" class="form-control" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Артикул (SKU) *</label>
+      <input type="text" name="sku" class="form-control" required>
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Описание</label>
+      <textarea name="description" rows="4" class="form-control"></textarea>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Цена</label>
+      <input type="text" name="price" class="form-control" placeholder="например 12345,67">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Старая цена</label>
+      <input type="text" name="old_price" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Себестоимость (тех.)</label>
+      <input type="text" name="cost_price" class="form-control">
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+        <label class="form-check-label" for="is_active">Показывать на сайте</label>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Категория (родитель)</label>
+      <select name="parent_id" class="form-select">
+        <option value="">— не выбирать —</option>
+        {% for c in top_cats %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">Можно сразу выбрать подкатегорию ниже — приоритет у неё.</div>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Подкатегория</label>
+      <select name="sub_id" class="form-select">
+        <option value="">— не выбирать —</option>
+        {% for c in subs %}
+            <option value="{{ c.id }}">
+            {% if c.parent %}{{ c.parent.name }} → {% endif %}{{ c.name }}
+            </option>
+        {% endfor %}
+        </select>
+
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Внешняя ссылка (если есть)</label>
+      <input type="url" name="external_url" class="form-control" placeholder="https://...">
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Характеристики (по строкам)</label>
+      <textarea name="specs_text" rows="6" class="form-control"
+        placeholder="Марка авто: Audi
+Модель авто: A4, A5
+Двигатель: 2.0 TFSI"></textarea>
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Фото</label>
+      <input type="file" name="images" class="form-control" multiple>
+      <div class="form-text">Можно выбрать сразу несколько картинок.</div>
+    </div>
+
+    <div class="col-12">
+      <button class="btn btn-primary">Создать товар</button>
+      <a href="{% url 'catalog:m_products' %}" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

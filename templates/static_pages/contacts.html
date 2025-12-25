@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<style>
+    .popup:not(._dropdown)._position_top{
+            top: 10px;
+            left: 10px;
+    }
+    @media(max-width: 768px){
+        .contact_page iframe{
+            width: 350px !important;
+        }
+    }
+</style>
+<section class="catalog_page">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumbs">
+                    <a href="/">Главная</a> / <a href="{% url 'page_contacts_short' %}">Контакты</a>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="contact_page">
+                    <div class="row">
+                        <div class="col-md-7">
+                           <script type="text/javascript" charset="utf-8" async src="https://api-maps.yandex.ru/services/constructor/1.0/js/?um=constructor%3A70758e7843013169dd606e2e22bd752ee4f9ecd3ac81105021caa133f42ad6ac&amp;width=100%25&amp;height=400&amp;lang=ru_RU&amp;scroll=true"></script>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="contact_info_con">
+                                <div class="one_con_info">
+                                    <img src="{% static 'img/Map_Pin.svg' %}" alt="">
+                                    <div>
+                                        <h3>Адрес</h3>
+                                        <h4>г. Петрозаводск, пр-кт Ленина, 33</h4>
+                                    </div>
+                                </div>
+                                <div class="one_con_info">
+                                    <img src="{% static 'img/Phone_con.svg' %}" alt="">
+                                    <div>
+                                        <h3>Телефон</h3>
+                                        <h4>+7 (495) 123-45-67</h4>
+                                    </div>
+                                </div>
+                                <div class="one_con_info">
+                                    <img src="{% static 'img/Mail.svg' %}" alt="">
+                                    <div>
+                                        <h3>E-mail</h3>
+                                        <h4>test@mail.ru</h4>
+                                    </div>
+                                </div>
+                                <div class="one_con_info">
+                                    <img src="{% static 'img/Clock.svg' %}" alt="">
+                                    <div class="w-100">
+                                        <h3>Режим работы</h3>
+                                        {% if page %}{{ page.content_html|safe }}{% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
